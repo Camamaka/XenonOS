@@ -26,5 +26,5 @@ late-commands:
     fi
   - |
     printf 'XenonOS \\n \\l\n\n' > /target/etc/issue
-    printf 'Hos geldin! Bu sistem XenonOS (Ubuntu tabanli).\n' > /target/etc/motd
+    printf 'Welcome! This system is XenonOS (Ubuntu-based).\n' > /target/etc/motd
 

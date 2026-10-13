@@ -10,7 +10,7 @@ Copy it to a USB drive with [Ventoy](https://www.ventoy.net) or write it with `d
 
 ## About
 
-XenonOS is a Linux distribution built on Debian 13 (trixie) and KDE Plasma, shipping with its own applications.
+XenonOS is a Linux distribution built on Debian 13 (trixie) and GNOME, shipping with its own applications.
 The ISO is produced with Debian's `live-build` and uses Calamares as the installer. Contents:
 
 | Folder | What's inside |

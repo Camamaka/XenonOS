@@ -1,4 +1,4 @@
-# XenonOS — Debian 13 (trixie) + KDE Plasma
+# XenonOS — Debian 13 (trixie) + GNOME
 
 XenonOS built from Debian packages, independent of Ubuntu.
 
@@ -20,6 +20,5 @@ Put `packages/*.deb` into an apt repository with `reprepro` or `aptly`, sign it 
 `config/archives/xenonos.list.chroot`. Updates then arrive through `apt upgrade`.
 
 ## Known gaps (not yet tested)
-- Plasma taskbar favorites (pinning Xenonium/XenonPad/XenonWriter) are not configured.
 - Calamares branding texts are replaced with `sed`; verify with a screenshot.
 - Package names were written for Debian 13; if `apt` cannot find one, `lb build` fails and it needs fixing.

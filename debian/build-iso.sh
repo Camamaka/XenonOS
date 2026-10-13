@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds the XenonOS (Debian 13 + KDE) ISO.  Run as ROOT in WSL:   sudo bash build-iso.sh
+# Builds the XenonOS (Debian 13 + GNOME) ISO.  Run as ROOT in WSL:   sudo bash build-iso.sh
 #
 # WARNING: This script downloads ~1.5-3 GB of Debian packages and installs live-build and debootstrap into WSL.
 #         Get approval before running it.  Output: D:\XenonOS\debian\out\xenonos-*.iso
