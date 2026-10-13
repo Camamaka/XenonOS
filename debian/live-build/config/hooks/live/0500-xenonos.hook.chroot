@@ -1,0 +1,158 @@
+#!/bin/sh
+# XenonOS: runs inside the chroot after packages are installed (branding and defaults).
+set -e
+
+echo "[xenonos] locale: English..."
+sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/; s/^# *\(tr_TR.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+locale-gen
+update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en
+echo "Europe/Istanbul" > /etc/timezone
+ln -sf /usr/share/zoneinfo/Europe/Istanbul /etc/localtime
+# keyboard: Turkish layout (physical keyboard), English interface
+if [ -f /etc/default/keyboard ]; then
+    sed -i 's/^XKBLAYOUT=.*/XKBLAYOUT="tr,us"/' /etc/default/keyboard
+fi
+
+echo "[xenonos] hostname / os-release / issue..."
+echo "xenonos" > /etc/hostname
+. /etc/xenonos-release
+# (xenonos-defaults' postinst already diverts os-release; make sure files are in place)
+[ -f /usr/lib/os-release ] && sed -i 's/^PRETTY_NAME=.*/PRETTY_NAME="'"$PRETTY_NAME"'"/' /usr/lib/os-release || true
+sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="XenonOS"/' /etc/default/grub 2>/dev/null || true
+
+echo "[xenonos] wallpaper PNG + dconf..."
+if command -v rsvg-convert >/dev/null 2>&1; then
+    rsvg-convert -w 1920 -h 1080 /usr/share/backgrounds/xenonos/xenonos.svg -o /usr/share/backgrounds/xenonos/xenonos.png || true
+fi
+dconf update || true
+
+echo "[xenonos] GDM: live session auto login..."
+mkdir -p /etc/gdm3
+if [ -f /etc/gdm3/daemon.conf ]; then
+    sed -i 's/^#\? *AutomaticLoginEnable.*/AutomaticLoginEnable = true/; s/^#\? *AutomaticLogin *=.*/AutomaticLogin = xenon/' /etc/gdm3/daemon.conf
+    grep -q '^AutomaticLoginEnable' /etc/gdm3/daemon.conf || sed -i 's/^\[daemon\]/[daemon]\nAutomaticLoginEnable = true\nAutomaticLogin = xenon/' /etc/gdm3/daemon.conf
+fi
+
+echo "[xenonos] application names (everything is XenonOS)..."
+rename_desktop() {   # file new-name [comment]
+    f="$1"; n="$2"; c="${3:-}"
+    [ -f "$f" ] || return 0
+    awk -v n="$n" -v c="$c" '
+        /^\[Desktop Action/ { act=1 }
+        !act && /^Name(\[[^]]*\])?=/ { if ($0 ~ /^Name=/) print "Name=" n; next }
+        !act && c != "" && /^Comment(\[[^]]*\])?=/ { if ($0 ~ /^Comment=/) print "Comment=" c; next }
+        { print }' "$f" > "$f.tmp" && cat "$f.tmp" > "$f" && rm -f "$f.tmp"
+}
+A=/usr/share/applications
+rename_desktop $A/org.gnome.Nautilus.desktop          "Xenon Files"           "Browse files and folders"
+rename_desktop $A/org.gnome.Settings.desktop          "Xenon Settings"        "XenonOS system settings"
+rename_desktop $A/org.gnome.Console.desktop           "Xenon Terminal"        "XenonOS terminal"
+rename_desktop $A/org.gnome.Calculator.desktop        "Xenon Calculator"
+rename_desktop $A/org.gnome.SystemMonitor.desktop     "Xenon System Monitor"
+rename_desktop $A/org.gnome.DiskUtility.desktop       "Xenon Disks"
+rename_desktop $A/org.gnome.clocks.desktop            "Xenon Clocks"
+rename_desktop $A/org.gnome.tweaks.desktop            "Xenon Tweaks"
+rename_desktop $A/org.gnome.Loupe.desktop             "Xenon Images"
+rename_desktop $A/org.gnome.Evince.desktop            "Xenon Documents"
+rename_desktop $A/org.gnome.FileRoller.desktop        "Xenon Archives"
+rename_desktop $A/org.gnome.Yelp.desktop              "Xenon Help"
+rename_desktop $A/org.gnome.Extensions.desktop        "Xenon Extensions"
+for f in $A/calamares-install-debian.desktop $A/calamares.desktop $A/install-debian.desktop; do
+    rename_desktop "$f" "Install XenonOS" "Install XenonOS to your computer"
+    [ -f "$f" ] && sed -i 's/^Icon=.*/Icon=install-xenonos/; s/^Keywords=.*/Keywords=calamares;system;install;xenonos;installer/' "$f" || true
+done
+# installer icon (Xe tile)
+if command -v rsvg-convert >/dev/null 2>&1 && [ -f /usr/share/xenonos/xenonos-icon.svg ]; then
+    rsvg-convert -w 128 -h 128 /usr/share/xenonos/xenonos-icon.svg -o /usr/share/pixmaps/install-xenonos.png || true
+fi
+mkdir -p /usr/share/icons/hicolor/scalable/apps
+cp /usr/share/xenonos/xenonos-icon.svg /usr/share/icons/hicolor/scalable/apps/install-xenonos.svg 2>/dev/null || true
+# the stock GNOME text editor is replaced by XenonPad
+for f in $A/org.gnome.TextEditor.desktop; do
+    [ -f "$f" ] && echo "NoDisplay=true" >> "$f" || true
+done
+
+echo "[xenonos] desktop shortcuts..."
+mkdir -p /etc/skel/Desktop
+for f in $A/calamares-install-debian.desktop $A/install-debian.desktop $A/calamares.desktop; do
+    [ -f "$f" ] && cp "$f" /etc/skel/Desktop/install-xenonos.desktop && break
+done
+chmod +x /etc/skel/Desktop/*.desktop 2>/dev/null || true
+
+echo "[xenonos] Calamares branding..."
+CB=/etc/calamares/branding
+if [ -d $CB/debian ]; then
+    rm -rf $CB/xenonos
+    cp -r $CB/debian $CB/xenonos
+    D=$CB/xenonos/branding.desc
+    sed -i 's/^componentName:.*/componentName:   xenonos/' $D
+    sed -i 's/^\( *productName:\).*/\1         XenonOS/; s/^\( *shortProductName:\).*/\1    XenonOS/' $D
+    sed -i 's/^\( *version:\).*/\1             1.0/; s/^\( *shortVersion:\).*/\1        1.0/' $D
+    sed -i 's/^\( *versionedName:\).*/\1       XenonOS 1.0 (Xe 54)/; s/^\( *shortVersionedName:\).*/\1  XenonOS 1.0/' $D
+    sed -i 's/^\( *bootloaderEntryName:\).*/\1 XenonOS/' $D
+    sed -i 's/"debian-logo.png"/"xenonos-logo.png"/g' $D
+    sed -i 's/SidebarBackground:    "#26475b"/SidebarBackground:    "#1a0f45"/; s/SidebarBackgroundCurrent: "#265370"/SidebarBackgroundCurrent: "#3a2a78"/' $D
+    if command -v rsvg-convert >/dev/null 2>&1; then
+        rsvg-convert -w 256 -h 256 /usr/share/xenonos/xenonos-icon.svg -o $CB/xenonos/xenonos-logo.png || true
+        rsvg-convert -w 800 -h 450 /usr/share/backgrounds/xenonos/xenonos.svg -o $CB/xenonos/welcome.png || true
+        rsvg-convert -w 800 -h 450 /usr/share/backgrounds/xenonos/xenonos.svg -o $CB/xenonos/slide1.png || true
+    fi
+    cp $CB/xenonos/xenonos-logo.png /usr/share/pixmaps/xenonos-installer.png 2>/dev/null || true
+    for s in /etc/calamares/settings.conf; do
+        [ -f "$s" ] && sed -i 's/^branding:.*/branding: xenonos/' "$s" || true
+    done
+fi
+
+echo "[xenonos] Calamares: offline bootloader helper + timezone default..."
+H=/usr/share/calamares/helpers/calamares-bootloader-config
+if [ -f $H ]; then
+    cat > $H <<'HELPER'
+#!/bin/bash
+# XenonOS: GRUB packages are pre-installed in the image, so no network/apt is needed here.
+CHROOT=$(mount | grep proc | grep calamares | awk '{print $3}' | sed -e "s#/proc##g")
+echo "Running XenonOS bootloader-config..."
+if [ -d /sys/firmware/efi/efivars ]; then
+    echo " * UEFI: using preinstalled grub-efi-amd64 / shim-signed"
+else
+    echo " * BIOS: using preinstalled grub-pc-bin"
+fi
+# make sure the target has what the bootloader module needs
+if [ ! -x "$CHROOT/usr/sbin/update-grub" ]; then
+    echo "ERROR: update-grub missing in target" >&2
+    exit 1
+fi
+# Re-enable os-prober
+sed -i "s/#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/g" $CHROOT/etc/default/grub
+sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="XenonOS"/' $CHROOT/etc/default/grub
+chroot $CHROOT /usr/sbin/update-grub
+HELPER
+    chmod 755 $H
+fi
+mkdir -p /etc/calamares/modules
+# live-only packages are removed from the installed system; some (live-task-*) are not in this image,
+# so use try_remove (skip missing packages instead of failing the whole installation)
+cat > /etc/calamares/modules/packages.conf <<'PKG'
+---
+backend: apt
+operations:
+  - try_remove:
+      - live-boot
+      - live-boot-doc
+      - live-config
+      - live-config-doc
+      - live-config-systemd
+      - live-tools
+      - live-task-localisation
+      - live-task-recommended
+      - calamares-settings-debian
+PKG
+cat > /etc/calamares/modules/locale.conf <<'LOC'
+---
+region: "Europe"
+zone: "Istanbul"
+useSystemTimezone: false
+geoip:
+    style: none
+LOC
+
+echo "[xenonos] done."

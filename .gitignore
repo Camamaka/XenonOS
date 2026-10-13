@@ -1,0 +1,10 @@
+﻿# build outputs / local files
+*.iso
+*.img
+__pycache__/
+*.pyc
+node_modules/
+dist/
+release/
+.env.local
+*.local

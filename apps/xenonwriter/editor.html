@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>XenonWriter</title>
+<style>
+:root{color-scheme:light}
+html{background:#dfe5ea}
+body{margin:0;padding:28px 0 60px;display:flex;justify-content:center;font-family:'Liberation Serif','DejaVu Serif',serif}
+#page{background:#fff;color:#111;width:794px;min-height:1123px;padding:96px;box-sizing:border-box;
+  box-shadow:0 2px 18px #0003;font-size:12pt;line-height:1.5;outline:none;word-wrap:break-word;overflow-wrap:anywhere}
+#page p{margin:0 0 .6em}
+#page h1{font-size:24pt;margin:.8em 0 .4em;line-height:1.2}
+#page h2{font-size:18pt;margin:.8em 0 .4em;line-height:1.25}
+#page h3{font-size:14pt;margin:.8em 0 .4em;line-height:1.3}
+#page blockquote{margin:.8em 0;padding:.2em 1em;border-left:4px solid #00a6c0;color:#445;background:#f3fafc}
+#page pre{background:#f2f4f6;border-radius:6px;padding:10px 14px;font:11pt 'Ubuntu Mono','DejaVu Sans Mono',monospace;white-space:pre-wrap}
+#page table{border-collapse:collapse;margin:.6em 0;width:100%}
+#page td,#page th{border:1px solid #9aa7b0;padding:6px 8px;min-width:30px}
+#page img{max-width:100%;height:auto}
+#page hr{border:0;border-top:1px solid #9aa7b0;margin:1em 0}
+#page a{color:#0a64c8}
+#page ul,#page ol{margin:.2em 0 .6em;padding-left:1.8em}
+::selection{background:#00b8d455}
+@page{size:A4;margin:20mm}
+@media print{
+  html{background:#fff}
+  body{padding:0;display:block}
+  #page{box-shadow:none;width:auto;min-height:0;padding:0}
+}
+</style></head>
+<body>
+<div id="page" contenteditable="true" spellcheck="true"><p><br></p></div>
+<script>
+(function(){
+  var page = document.getElementById('page');
+  var timer = null, statTimer = null;
+  function send(o){ try { window.webkit.messageHandlers.xw.postMessage(JSON.stringify(o)); } catch(e){} }
+
+  function pt(px){ return Math.round(px * 0.75 * 2) / 2; }
+  function sel(){ return window.getSelection(); }
+  function currentEl(){
+    var s = sel(); if (!s || !s.rangeCount) return null;
+    var n = s.getRangeAt(0).startContainer; return n.nodeType === 3 ? n.parentElement : n;
+  }
+  function reportState(){
+    var el = currentEl(); if (!el || !page.contains(el)) return;
+    var cs = getComputedStyle(el);
+    var block = (document.queryCommandValue('formatBlock') || '').toLowerCase().replace(/[<>]/g,'');
+    var st = {
+      t:'state',
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      underline: document.queryCommandState('underline'),
+      strike: document.queryCommandState('strikeThrough'),
+      ul: document.queryCommandState('insertUnorderedList'),
+      ol: document.queryCommandState('insertOrderedList'),
+      left: document.queryCommandState('justifyLeft'),
+      center: document.queryCommandState('justifyCenter'),
+      right: document.queryCommandState('justifyRight'),
+      full: document.queryCommandState('justifyFull'),
+      block: block,
+      font: (cs.fontFamily || '').split(',')[0].replace(/["']/g,'').trim(),
+      size: pt(parseFloat(cs.fontSize))
+    };
+    send(st);
+  }
+  function scheduleState(){ clearTimeout(timer); timer = setTimeout(reportState, 60); }
+  function reportStats(){
+    var txt = page.innerText || '';
+    var words = (txt.match(/\S+/g) || []).length;
+    send({t:'stats', words: words, chars: txt.replace(/\n/g,'').length});
+  }
+  function scheduleStats(){ clearTimeout(statTimer); statTimer = setTimeout(reportStats, 250); }
+
+  document.addEventListener('selectionchange', scheduleState);
+  page.addEventListener('input', function(){ send({t:'mod'}); scheduleStats(); });
+  page.addEventListener('keyup', scheduleState);
+  page.addEventListener('mouseup', scheduleState);
+  page.addEventListener('keydown', function(e){
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      var el = currentEl();
+      if (el && el.closest && el.closest('li')) document.execCommand(e.shiftKey ? 'outdent' : 'indent');
+      else if (el && el.closest && el.closest('td,th')) {
+        var cells = Array.prototype.slice.call(page.querySelectorAll('td,th'));
+        var i = cells.indexOf(el.closest('td,th')); var nx = cells[i + (e.shiftKey ? -1 : 1)];
+        if (nx) { var r = document.createRange(); r.selectNodeContents(nx); r.collapse(true); sel().removeAllRanges(); sel().addRange(r); }
+      } else document.execCommand('insertHTML', false, '&emsp;');
+    }
+  });
+  // yapistirilan metindeki satir ici stilleri sadelestir (arka plan / yazi tipi karisikligi olmasin)
+  page.addEventListener('paste', function(e){
+    var cd = e.clipboardData; if (!cd) return;
+    var html = cd.getData('text/html');
+    if (!html) return;
+    e.preventDefault();
+    var tmp = document.createElement('div'); tmp.innerHTML = html;
+    tmp.querySelectorAll('script,style,meta,link,title').forEach(function(n){ n.remove(); });
+    tmp.querySelectorAll('*').forEach(function(n){
+      n.removeAttribute('class'); n.removeAttribute('id');
+      var s = n.style; if (s) { s.removeProperty('font-family'); s.removeProperty('font-size'); s.removeProperty('background'); s.removeProperty('background-color'); s.removeProperty('line-height'); s.removeProperty('margin'); }
+      if (n.getAttribute && n.getAttribute('style') === '') n.removeAttribute('style');
+    });
+    document.execCommand('insertHTML', false, tmp.innerHTML);
+  });
+
+  window.xw = {
+    cmd: function(name, value){ page.focus(); document.execCommand(name, false, value === undefined ? null : value); scheduleState(); send({t:'mod'}); scheduleStats(); },
+    block: function(tag){ page.focus(); document.execCommand('formatBlock', false, tag); scheduleState(); send({t:'mod'}); },
+    fontName: function(n){ page.focus(); document.execCommand('fontName', false, n); send({t:'mod'}); },
+    fontSize: function(ptv){
+      page.focus();
+      document.execCommand('fontSize', false, '7');
+      page.querySelectorAll('font[size="7"]').forEach(function(f){
+        var s = document.createElement('span'); s.style.fontSize = ptv + 'pt';
+        while (f.firstChild) s.appendChild(f.firstChild);
+        f.parentNode.replaceChild(s, f);
+      });
+      scheduleState(); send({t:'mod'});
+    },
+    color: function(c){ page.focus(); document.execCommand('foreColor', false, c); send({t:'mod'}); },
+    highlight: function(c){ page.focus(); document.execCommand('hiliteColor', false, c); send({t:'mod'}); },
+    link: function(url){ page.focus(); if (!url) { document.execCommand('unlink'); } else { document.execCommand('createLink', false, url); } send({t:'mod'}); },
+    image: function(src){ page.focus(); document.execCommand('insertImage', false, src); send({t:'mod'}); },
+    table: function(rows, cols){
+      var h = '<table>'; for (var r = 0; r < rows; r++) { h += '<tr>'; for (var c = 0; c < cols; c++) h += '<td><br></td>'; h += '</tr>'; } h += '</table><p><br></p>';
+      page.focus(); document.execCommand('insertHTML', false, h); send({t:'mod'});
+    },
+    hr: function(){ page.focus(); document.execCommand('insertHorizontalRule'); send({t:'mod'}); },
+    clear: function(){ page.focus(); document.execCommand('removeFormat'); document.execCommand('formatBlock', false, 'p'); send({t:'mod'}); },
+    selectedText: function(){ return String(sel()); },
+    getHTML: function(){ return page.innerHTML; },
+    getText: function(){ return page.innerText; },
+    setHTML: function(h){ page.innerHTML = h && h.trim() ? h : '<p><br></p>'; scheduleStats(); scheduleState(); window.scrollTo(0,0); },
+    focus: function(){ page.focus(); }
+  };
+  reportStats();
+  send({t:'ready'});
+})();
+</script>
+</body></html>

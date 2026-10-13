@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#7c4dff"/></linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="#0d2b3e"/>
+  <polygon points="16,3.5 26.5,9.5 26.5,22.5 16,28.5 5.5,22.5 5.5,9.5" fill="none" stroke="url(#g)" stroke-width="1.8" stroke-linejoin="round"/>
+  <text x="11.2" y="17.6" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="bold" fill="#e6faff">A</text>
+  <text x="21.2" y="22.6" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="9.5" font-weight="bold" fill="#00e5ff">文</text>
+</svg>

@@ -1,0 +1,16 @@
+#!/bin/sh
+# XenonOS: runs on the build host in the binary tree: rename boot menu entries to XenonOS
+set -e
+echo "[xenonos] boot menu branding..."
+for f in binary/isolinux/*.cfg binary/boot/grub/*.cfg binary/boot/grub/*/*.cfg; do
+    [ -f "$f" ] || continue
+    sed -i 's/Debian GNU\/Linux [0-9.]* (trixie)/XenonOS (Xe 54)/g; s/Debian GNU\/Linux/XenonOS/g; s/Live system/XenonOS Live/g; s/Debian Live/XenonOS Live/g; s/Debian/XenonOS/g' "$f"
+done
+# syslinux splash image (640x480) from the brand wallpaper, if rsvg-convert exists on the host
+SVG=chroot/usr/share/backgrounds/xenonos/xenonos.svg
+if [ -f "$SVG" ] && command -v rsvg-convert >/dev/null 2>&1; then
+    for img in binary/isolinux/splash.png binary/isolinux/splash.svg; do
+        [ -f "$img" ] && rsvg-convert -w 640 -h 480 -a "$SVG" -o binary/isolinux/splash.png && break || true
+    done
+fi
+echo "[xenonos] boot menu done."

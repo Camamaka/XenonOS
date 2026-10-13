@@ -1,0 +1,7 @@
+{
+  "uuid": "xenonnews@xenonos",
+  "name": "Xenon News",
+  "description": "XenonOS desktop news widget (bottom-left). Triple-click the Xe tile for the credits.",
+  "shell-version": ["48", "49"],
+  "version": 1
+}

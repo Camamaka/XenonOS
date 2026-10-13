@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a0f45"/><stop offset="1" stop-color="#0b0720"/></linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#9b6bff" stop-opacity=".5"/><stop offset="1" stop-color="#9b6bff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <circle cx="510" cy="120" r="170" fill="url(#glow)"/>
+  <g fill="none" stroke="url(#gl)" stroke-width="1.2" opacity=".55">
+    <circle cx="510" cy="120" r="40"/><circle cx="510" cy="120" r="64"/><circle cx="510" cy="120" r="88"/>
+    <circle cx="510" cy="120" r="112"/><circle cx="510" cy="120" r="136"/>
+  </g>
+  <!-- Xe 54 karosu -->
+  <g transform="translate(36,26)">
+    <rect width="104" height="104" rx="11" fill="url(#bg)" stroke="url(#gl)" stroke-width="3"/>
+    <text x="9" y="22" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#6ee7ff">54</text>
+    <text x="95" y="19" font-family="DejaVu Sans, sans-serif" font-size="9" text-anchor="end" fill="#f1ecff" opacity=".6">131.293</text>
+    <text x="52" y="68" font-family="DejaVu Sans, sans-serif" font-size="44" font-weight="700" text-anchor="middle" fill="#f1ecff">Xe</text>
+    <text x="52" y="92" font-family="DejaVu Sans, sans-serif" font-size="12" text-anchor="middle" letter-spacing="2" fill="#6ee7ff">Xenon</text>
+  </g>
+  <text x="162" y="82" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="700" letter-spacing="4" fill="#f1ecff">XENON<tspan fill="url(#gl)">OS</tspan></text>
+  <text x="164" y="112" font-family="DejaVu Sans, sans-serif" font-size="13" letter-spacing="3" fill="#6ee7ff">THE NOBLE GAS OF OPERATING SYSTEMS</text>
+  <text x="164" y="140" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#f1ecff" opacity=".6">Xe · 54 · 131.293 · Debian 13 (trixie) based</text>
+  <text x="36" y="196" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#f1ecff" opacity=".45">Founders: DTA &amp; CMK  ·  Designer: EHA</text>
+</svg>

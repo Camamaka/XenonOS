@@ -1,0 +1,21 @@
+{
+  "id": "xenontranslate",
+  "name": "XenonTranslate",
+  "version": "1.0",
+  "description": "Translates selected text and whole web pages into the language you choose. Detects the page language automatically.",
+  "icon": "icon.svg",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": {
+    "hosts": ["translate.googleapis.com", "api.mymemory.translated.net"]
+  },
+  "browser_action": {
+    "title": "XenonTranslate - translate this page",
+    "command": "toggle-panel"
+  }
+}

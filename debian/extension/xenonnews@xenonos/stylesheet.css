@@ -1,0 +1,76 @@
+.xenon-news {
+    width: 390px;
+    padding: 14px;
+    border-radius: 18px;
+    background-color: rgba(11, 7, 32, 0.78);
+    border: 1px solid rgba(155, 107, 255, 0.55);
+    spacing: 8px;
+}
+
+.xenon-news-header {
+    spacing: 12px;
+}
+
+.xenon-tile {
+    width: 58px;
+    height: 58px;
+    padding: 4px 6px;
+    border-radius: 9px;
+    background-color: #0b0720;
+    border: 2px solid #8b6bff;
+}
+
+.xenon-tile:hover {
+    border-color: #6ee7ff;
+    background-color: #1a0f45;
+}
+
+.xenon-tile-number {
+    font-size: 9px;
+    font-weight: bold;
+    color: #6ee7ff;
+}
+
+.xenon-tile-symbol {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f1ecff;
+}
+
+.xenon-news-title {
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #6ee7ff;
+    min-width: 220px;
+}
+
+.xenon-news-sub {
+    font-size: 10px;
+    color: rgba(241, 236, 255, 0.6);
+}
+
+.xenon-credits {
+    font-size: 13px;
+    font-weight: bold;
+    color: #f1ecff;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background-color: rgba(139, 107, 255, 0.25);
+}
+
+.xenon-news-list {
+    spacing: 4px;
+}
+
+.xenon-news-item {
+    padding: 6px 8px;
+    border-radius: 8px;
+    text-align: left;
+    color: #f1ecff;
+    font-size: 12px;
+}
+
+.xenon-news-item:hover {
+    background-color: rgba(110, 231, 255, 0.14);
+}

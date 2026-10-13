@@ -1,0 +1,30 @@
+version: 1
+# Bu bolumler kurulum ekraninda sana sorulur, gerisi otomatik gecer.
+interactive-sections:
+  - locale
+  - keyboard
+  - network
+  - storage
+  - identity
+refresh-installer:
+  update: false
+late-commands:
+  - |
+    DE=$(sed -n 's/.*xenonde=\([a-z]*\).*/\1/p' /proc/cmdline)
+    case "$DE" in
+      kde)  PKG="kde-plasma-desktop sddm network-manager" ;;
+      xfce) PKG="xfce4 xfce4-goodies lightdm lightdm-gtk-greeter network-manager" ;;
+      none) PKG="" ;;
+      *)    PKG="ubuntu-desktop-minimal" ;;
+    esac
+    if [ -n "$PKG" ]; then
+      curtin in-target --target=/target -- apt-get update
+      curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive apt-get install -y $PKG
+      # masaustu kurulunca ag yonetimi NetworkManager'a gecsin
+      printf 'network:\n  version: 2\n  renderer: NetworkManager\n' > /target/etc/netplan/90-xenonos.yaml
+      chmod 600 /target/etc/netplan/90-xenonos.yaml
+    fi
+  - |
+    printf 'XenonOS \\n \\l\n\n' > /target/etc/issue
+    printf 'Hos geldin! Bu sistem XenonOS (Ubuntu tabanli).\n' > /target/etc/motd
+
