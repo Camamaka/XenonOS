@@ -4,7 +4,7 @@
 
 **[xenonos-amd64.hybrid.iso (v1.0, Debian-based, 1.7 GB)](https://github.com/Camamaka/XenonOS/releases/download/v1.0/xenonos-amd64.hybrid.iso)** · [Release page](https://github.com/Camamaka/XenonOS/releases/tag/v1.0)
 
-SHA256: `3C117B0AF647DC9D34FA0D21BBDF21423043C90BC0217CAE4471455D6B8A517E`
+SHA256: `56D2F5D068FF6A0FEEE0E93D21A27C3C3565078D3353F4BF37473A10D0FC74ED`
 
 Copy it to a USB drive with [Ventoy](https://www.ventoy.net) or write it with `dd`.
 
@@ -66,6 +66,11 @@ Alt+T (on a page) XenonTranslate panel.
 Translates selected text (via the 文 button that appears on selection), translates the whole page or restores the original,
 and detects the page language. Translation service: `translate.googleapis.com` (keyless, unofficial endpoint) with MyMemory as a fallback.
 If access to the service changes, update the `gtx()` function in `content.js`.
+
+## Credits
+- **Founders:** DTA and CMK
+- **Design:** EHA
+- **Maintainer:** [Camamaka](https://github.com/Camamaka)
 
 ## Contributing and license
 Issues and pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). XenonOS is released under the [MIT License](LICENSE).
