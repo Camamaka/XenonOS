@@ -69,7 +69,7 @@ AX, CX, DX, BX, SP, BP, SI, DI = range(8)
 AL, CL, DL, BL, AH, CH, DH, BH = range(8)
 
 # ------------------------------------------------------------------ texts
-FIKRALAR = [
+JOKES = [
     "Temel goes to the doctor: 'Doctor, I've started forgetting things.'\r\nDoctor: 'Since when?'  Temel: 'Since when what?'",
     "Teacher: 'Children, use both because and but in one sentence.'\r\nAli: 'Because the lesson was great, but the bell rang.'",
     "They asked Nasreddin Hoca: 'Which is more useful, the moon or the sun?'\r\nHoca: 'The moon, of course! It gives light in the dark; the sun is out in the daytime anyway.'",
@@ -77,7 +77,7 @@ FIKRALAR = [
     "Why doesn't a computer catch a cold?\r\nBecause its Windows is always open... but it freezes sometimes.",
     "The cat asked the dog: 'Why do you always bark?'\r\nDog: 'Because you always meow, one of us has to talk.'",
 ]
-SOZLER = [
+QUOTES = [
     "Small steps also take you to the goal. What matters is not stopping.",
     "Being one step better than yesterday is enough.",
     "Making mistakes is part of learning, giving up is not.",
@@ -85,7 +85,7 @@ SOZLER = [
     "Don't wait to be perfect to start; start so that you become perfect.",
     "Believe you can and you're halfway there.",
 ]
-YEMEKLER = [
+MEALS = [
     "Menemen (the onions-or-no-onions debate is a bonus)",
     "Lahmacun and ayran", "Manti with lots of yogurt", "Chicken rice and cacik",
     "Pasta with lots of cheese on top", "White beans and rice",
@@ -107,7 +107,7 @@ BANNER = (
     "   [0] Reboot" + NL + NL +
     "   Press a key > "
 )
-DEVAM = NL + NL + "   (press a key to continue)"
+CONTINUE_MSG = NL + NL + "   (press a key to continue)"
 
 
 def kernel():
@@ -121,11 +121,11 @@ def kernel():
     a.call('cls')
     a.mov_r16_label(SI, 'banner'); a.call('print')
     a.call('getkey')
-    a.cmp_al(ord('1')); a.je('do_fikra')
-    a.cmp_al(ord('2')); a.je('do_soz')
-    a.cmp_al(ord('3')); a.je('do_yemek')
-    a.cmp_al(ord('4')); a.je('do_zar')
-    a.cmp_al(ord('5')); a.je('do_surpriz')
+    a.cmp_al(ord('1')); a.je('do_joke')
+    a.cmp_al(ord('2')); a.je('do_quote')
+    a.cmp_al(ord('3')); a.je('do_meal')
+    a.cmp_al(ord('4')); a.je('do_die')
+    a.cmp_al(ord('5')); a.je('do_surprise')
     a.cmp_al(ord('0')); a.je('do_reboot')
     a.jmp('main')
 
@@ -141,37 +141,37 @@ def kernel():
         a.call('print')
         a.jmp('wait_back')
 
-    pick_section('do_fikra', 0x0E, 't_fikra', len(FIKRALAR), 'tb_fikra')
-    pick_section('do_soz', 0x0A, 't_soz', len(SOZLER), 'tb_soz')
-    pick_section('do_yemek', 0x0D, 't_yemek', len(YEMEKLER), 'tb_yemek')
+    pick_section('do_joke', 0x0E, 't_joke', len(JOKES), 'tb_joke')
+    pick_section('do_quote', 0x0A, 't_quote', len(QUOTES), 'tb_quote')
+    pick_section('do_meal', 0x0D, 't_meal', len(MEALS), 'tb_meal')
 
-    a.label('do_zar')
+    a.label('do_die')
     a.mov_r8(AL, 0x0C); a.st_al('attr')
     a.call('cls')
-    a.mov_r16_label(SI, 't_zar'); a.call('print')
+    a.mov_r16_label(SI, 't_die'); a.call('print')
     a.call('rand'); a.raw(0x31, 0xD2)            # xor dx,dx
     a.mov_r16(BX, 6); a.raw(0xF7, 0xF3)          # div bx
     a.raw(0x88, 0xD0); a.raw(0x04, ord('1'))     # mov al,dl ; add al,'1'
     a.call('putc')
     a.jmp('wait_back')
 
-    a.label('do_surpriz')
+    a.label('do_surprise')
     a.mov_r8(AL, 0x0F); a.st_al('attr')
     a.call('cls')
-    a.mov_r16_label(SI, 't_surpriz'); a.call('print')
+    a.mov_r16_label(SI, 't_surprise'); a.call('print')
     a.mov_r8(AL, 0x0E); a.st_al('attr')
-    a.mov_r16(BX, len(FIKRALAR)); a.mov_r16_label(CX, 'tb_fikra'); a.call('pick'); a.call('print')
+    a.mov_r16(BX, len(JOKES)); a.mov_r16_label(CX, 'tb_joke'); a.call('pick'); a.call('print')
     a.mov_r16_label(SI, 'nl2'); a.call('print')
     a.mov_r8(AL, 0x0A); a.st_al('attr')
-    a.mov_r16(BX, len(SOZLER)); a.mov_r16_label(CX, 'tb_soz'); a.call('pick'); a.call('print')
+    a.mov_r16(BX, len(QUOTES)); a.mov_r16_label(CX, 'tb_quote'); a.call('pick'); a.call('print')
     a.mov_r16_label(SI, 'nl2'); a.call('print')
     a.mov_r8(AL, 0x0D); a.st_al('attr')
-    a.mov_r16(BX, len(YEMEKLER)); a.mov_r16_label(CX, 'tb_yemek'); a.call('pick'); a.call('print')
+    a.mov_r16(BX, len(MEALS)); a.mov_r16_label(CX, 'tb_meal'); a.call('pick'); a.call('print')
     a.jmp('wait_back')
 
     a.label('wait_back')
     a.mov_r8(AL, 0x07); a.st_al('attr')
-    a.mov_r16_label(SI, 'devam'); a.call('print')
+    a.mov_r16_label(SI, 'press_key'); a.call('print')
     a.call('getkey')
     a.jmp('main')
 
@@ -246,13 +246,13 @@ def kernel():
         a.label(lbl); a.raw(*(text.encode('ascii') + b'\0'))
 
     s('banner', BANNER)
-    s('devam', DEVAM)
+    s('press_key', CONTINUE_MSG)
     s('nl2', NL + NL)
-    s('t_fikra', NL + "   === JOKE OF THE DAY ===" + NL + NL + "   ")
-    s('t_soz', NL + "   === MOTIVATION ===" + NL + NL + "   ")
-    s('t_yemek', NL + "   === WHAT SHOULD I EAT TODAY? ===" + NL + NL + "   Suggestion: ")
-    s('t_zar', NL + "   === DIE ===" + NL + NL + "   Die: ")
-    s('t_surpriz', NL + "   === SURPRISE! ===" + NL + NL)
+    s('t_joke', NL + "   === JOKE OF THE DAY ===" + NL + NL + "   ")
+    s('t_quote', NL + "   === MOTIVATION ===" + NL + NL + "   ")
+    s('t_meal', NL + "   === WHAT SHOULD I EAT TODAY? ===" + NL + NL + "   Suggestion: ")
+    s('t_die', NL + "   === DIE ===" + NL + NL + "   Die: ")
+    s('t_surprise', NL + "   === SURPRISE! ===" + NL + NL)
 
     def table(lbl, items, prefix):
         for i, t in enumerate(items):
@@ -261,9 +261,9 @@ def kernel():
         for i in range(len(items)):
             a.ref_abs(f'{lbl}_{i}')
 
-    table('tb_fikra', FIKRALAR, '')
-    table('tb_soz', SOZLER, '')
-    table('tb_yemek', YEMEKLER, '')
+    table('tb_joke', JOKES, '')
+    table('tb_quote', QUOTES, '')
+    table('tb_meal', MEALS, '')
     return a.finish()
 
 
