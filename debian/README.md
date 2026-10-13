@@ -1,25 +1,25 @@
 # XenonOS — Debian 13 (trixie) + KDE Plasma
 
-Ubuntu tabanından bağımsız, Debian paketleriyle kurulan XenonOS.
+XenonOS built from Debian packages, independent of Ubuntu.
 
-## Yapı
-| Yol | Ne |
+## Layout
+| Path | What |
 |---|---|
-| `build-debs.sh` | `xenonium`, `xenonpad`, `xenonwriter`, `xenonos-defaults` `.deb` paketlerini üretir (internet gerektirmez) |
-| `packages/` | Üretilen `.deb` dosyaları |
-| `live-build/` | Debian `live-build` yapılandırması (paket listesi, kancalar, marka) |
-| `build-iso.sh` | Araçları kurar, ISO'yu üretir (**indirme yapar**) |
+| `build-debs.sh` | Builds the `xenonium`, `xenonpad`, `xenonwriter` and `xenonos-defaults` `.deb` packages (no internet required) |
+| `packages/` | Generated `.deb` files |
+| `live-build/` | Debian `live-build` configuration (package list, hooks, branding) |
+| `build-iso.sh` | Installs the tools and builds the ISO (**downloads packages**) |
 
-## Sıra
-1. `sudo bash build-debs.sh`  → paketler (indirme yok)
-2. `sudo bash build-iso.sh`   → araç kurulumu + Debian paketleri indirme + ISO (≈ 1.5–3 GB indirme, 20–60 dk)
-3. `out/xenonos-*.iso` dosyasını VirtualBox'ta aç.
+## Steps
+1. `sudo bash build-debs.sh`  → packages (no download)
+2. `sudo bash build-iso.sh`   → tool setup + Debian package download + ISO (≈ 1.5–3 GB download, 20–60 min)
+3. Open `out/xenonos-*.iso` in VirtualBox.
 
-## Kendi paket deposunu yayınlamak (sonraki adım)
-`packages/*.deb` dosyalarını `reprepro` veya `aptly` ile bir apt deposuna koy, GPG ile imzala,
-`config/archives/xenonos.list.chroot` içine depo adresini yaz. Böylece güncellemeler `apt upgrade` ile gelir.
+## Publishing your own package repository (next step)
+Put `packages/*.deb` into an apt repository with `reprepro` or `aptly`, sign it with GPG, and write the repository address into
+`config/archives/xenonos.list.chroot`. Updates then arrive through `apt upgrade`.
 
-## Bilinen eksikler (henüz test edilmedi)
-- Plasma görev çubuğu favorileri (Xenonium/XenonPad/XenonWriter sabitleme) ayarlanmadı.
-- Calamares marka metinleri `sed` ile değiştiriliyor; ekran görüntüsüyle doğrulanmalı.
-- Paket adları Debian 13'e göre yazıldı; `apt` bulamazsa `lb build` hata verir, düzeltilir.
+## Known gaps (not yet tested)
+- Plasma taskbar favorites (pinning Xenonium/XenonPad/XenonWriter) are not configured.
+- Calamares branding texts are replaced with `sed`; verify with a screenshot.
+- Package names were written for Debian 13; if `apt` cannot find one, `lb build` fails and it needs fixing.
