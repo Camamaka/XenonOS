@@ -1,5 +1,15 @@
 # XenonOS
 
+## İndir
+
+**[xenonos-amd64.hybrid.iso (v1.0, Debian tabanlı, 1,7 GB)](https://github.com/Camamaka/XenonOS/releases/download/v1.0/xenonos-amd64.hybrid.iso)** · [Release sayfası](https://github.com/Camamaka/XenonOS/releases/tag/v1.0)
+
+SHA256: `3C117B0AF647DC9D34FA0D21BBDF21423043C90BC0217CAE4471455D6B8A517E`
+
+USB'ye [Ventoy](https://www.ventoy.net) ile kopyalayarak veya `dd` ile yazarak kullanabilirsiniz.
+
+## Hakkında
+
 Ubuntu 26.04 masaüstü ISO'sunun üstüne kurulan XenonOS. İçindekiler:
 
 | Klasör | Ne var |
