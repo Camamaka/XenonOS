@@ -8,6 +8,18 @@ SHA256: `3C117B0AF647DC9D34FA0D21BBDF21423043C90BC0217CAE4471455D6B8A517E`
 
 Copy it to a USB drive with [Ventoy](https://www.ventoy.net) or write it with `dd`.
 
+## Screenshots
+
+![XenonOS desktop](docs/screenshots/desktop.png)
+
+| Boot menu | Xenonium browser |
+|---|---|
+| ![Boot menu](docs/screenshots/boot-menu.png) | ![Xenonium](docs/screenshots/xenonium.png) |
+
+| XenonPad | XenonWriter |
+|---|---|
+| ![XenonPad](docs/screenshots/xenonpad.png) | ![XenonWriter](docs/screenshots/xenonwriter.png) |
+
 ## About
 
 XenonOS is a Linux distribution built on Debian 13 (trixie) and GNOME, shipping with its own applications.
@@ -54,3 +66,6 @@ Alt+T (on a page) XenonTranslate panel.
 Translates selected text (via the 文 button that appears on selection), translates the whole page or restores the original,
 and detects the page language. Translation service: `translate.googleapis.com` (keyless, unofficial endpoint) with MyMemory as a fallback.
 If access to the service changes, update the `gtx()` function in `content.js`.
+
+## Contributing and license
+Issues and pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). XenonOS is released under the [MIT License](LICENSE).

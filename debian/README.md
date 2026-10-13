@@ -19,6 +19,10 @@ XenonOS built from Debian packages, independent of Ubuntu.
 Put `packages/*.deb` into an apt repository with `reprepro` or `aptly`, sign it with GPG, and write the repository address into
 `config/archives/xenonos.list.chroot`. Updates then arrive through `apt upgrade`.
 
+## Test status
+- The v1.0 ISO boots in VirtualBox 7.2 (BIOS): boot menu, GNOME live session, dock favorites, and Xenonium, XenonPad and XenonWriter all start.
+- Installing to disk with Calamares has not been tested yet.
+
 ## Known gaps (not yet tested)
 - Calamares branding texts are replaced with `sed`; verify with a screenshot.
 - Package names were written for Debian 13; if `apt` cannot find one, `lb build` fails and it needs fixing.
