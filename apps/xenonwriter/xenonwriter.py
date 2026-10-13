@@ -260,7 +260,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         self.lbl_state = Gtk.Label(label="", xalign=0)
         zoom_out = self._tb("zoom-out-symbolic", "Zoom out", lambda *_: self._zoom(-0.1))
         zoom_in = self._tb("zoom-in-symbolic", "Zoom in", lambda *_: self._zoom(+0.1))
-        self.lbl_zoom = Gtk.Label(label="%100")
+        self.lbl_zoom = Gtk.Label(label="100%")
         st.pack_start(self.lbl_words, False, False, 0)
         st.pack_start(self.lbl_state, True, True, 0)
         for w in (zoom_out, self.lbl_zoom, zoom_in):
@@ -510,7 +510,7 @@ class WriterWindow(Gtk.ApplicationWindow):
     def _zoom(self, delta):
         z = 1.0 if delta == 0 else max(0.4, min(3.0, round(self.view.get_zoom_level() + delta, 2)))
         self.view.set_zoom_level(z)
-        self.lbl_zoom.set_text(f"%{round(z * 100)}")
+        self.lbl_zoom.set_text(f"{round(z * 100)}%")
 
     # ------------------------------------------------------------------ file operations
     @property

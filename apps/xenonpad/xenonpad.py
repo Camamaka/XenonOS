@@ -155,7 +155,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         self.lbl_pos = Gtk.Label(label="Ln 1, Col 1")
         self.lbl_stats = Gtk.Label(label="0 characters")
         self.lbl_enc = Gtk.Label(label="UTF-8")
-        self.lbl_zoom = Gtk.Label(label="%100")
+        self.lbl_zoom = Gtk.Label(label="100%")
         spacer = Gtk.Box(hexpand=True)
         for w in (self.lbl_pos, self.lbl_stats, spacer, self.lbl_enc, self.lbl_zoom):
             status.append(w)
@@ -234,7 +234,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         self.prefs["zoom"] = self.zoom
         save_prefs(self.prefs)
         self._apply_font()
-        self.lbl_zoom.set_text(f"%{round(self.zoom*100)}")
+        self.lbl_zoom.set_text(f"{round(self.zoom*100)}%")
 
     def _toggle_wrap(self, action, _param):
         self.wrap = not self.wrap

@@ -223,6 +223,14 @@ sources=[('xkb', 'tr'), ('xkb', 'us')]
 [org/gnome/desktop/wm/preferences]
 button-layout='appmenu:minimize,maximize,close'
 
+[org/gnome/settings-daemon/plugins/media-keys]
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/xenon-terminal/']
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/xenon-terminal]
+name='Terminal'
+command='kgx'
+binding='<Primary><Alt>t'
+
 [org/gnome/shell]
 favorite-apps=['org.xenonos.Xenonium.desktop', 'org.gnome.Nautilus.desktop', 'org.xenonos.XenonPad.desktop', 'org.xenonos.XenonWriter.desktop', 'org.gnome.Console.desktop', 'org.gnome.Settings.desktop']
 enabled-extensions=['xenonnews@xenonos']
