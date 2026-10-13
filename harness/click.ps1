@@ -36,8 +36,8 @@ $sx = $r.L + $X; $sy = $r.T + $Y
 [void][WinClick]::SetCursorPos($sx, $sy)
 Start-Sleep -Milliseconds 250
 for ($i = 0; $i -lt $Count; $i++) {
-  [WinClick]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)   # sol dugme asagi
-  [WinClick]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)   # sol dugme yukari
+  [WinClick]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)   # left button down
+  [WinClick]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)   # left button up
   Start-Sleep -Milliseconds $GapMs
 }
 "tiklandi: ekran ($sx,$sy) x$Count"

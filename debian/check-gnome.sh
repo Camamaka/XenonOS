@@ -1,5 +1,5 @@
 #!/bin/bash
-# GNOME icin aday paket adlarini, onceki derlemeden kalan chroot'un apt dizinine karsi dogrular (indirme yok)
+# Validates candidate GNOME package names against the apt directory of the chroot left over from the previous build (no download)
 CH=/root/xenonos-lb/chroot
 [ -d "$CH/var/lib/apt/lists" ] || { echo "chroot yok"; exit 1; }
 for p in gnome-shell gdm3 gnome-session nautilus gnome-control-center gnome-console gnome-terminal gnome-calculator \

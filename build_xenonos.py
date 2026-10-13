@@ -1,7 +1,7 @@
-"""XenonOS derleyicisi: 16-bit gercek mod makine kodunu elle uretir, 1.44MB disket imaji yazar."""
+"""XenonOS builder: hand-assembles 16-bit real-mode machine code and writes a 1.44MB floppy image."""
 import struct, math
 
-KBASE = 0x7E00  # cekirdek yukleme adresi
+KBASE = 0x7E00  # kernel load address
 
 
 class Asm:
@@ -68,7 +68,7 @@ class Asm:
 AX, CX, DX, BX, SP, BP, SI, DI = range(8)
 AL, CL, DL, BL, AH, CH, DH, BH = range(8)
 
-# ------------------------------------------------------------------ metinler
+# ------------------------------------------------------------------ texts
 FIKRALAR = [
     "Temel doktora gider: 'Doktor bey, unutkanlik basladi.'\r\nDoktor: 'Ne zamandan beri?'  Temel: 'Ne zamandan beri ne?'",
     "Ogretmen: 'Cocuklar, bir cumlede hem cunku hem ama kullanin.'\r\nAli: 'Cunku ders cok guzeldi ama zil caldi.'",
@@ -113,11 +113,11 @@ DEVAM = NL + NL + "   (devam icin bir tusa bas)"
 def kernel():
     a = Asm(KBASE)
 
-    # ---- giris ----
+    # ---- entry ----
     a.label('start')
-    a.mov_r16(AX, 0x0003); a.int_(0x10)          # 80x25 metin modu
+    a.mov_r16(AX, 0x0003); a.int_(0x10)          # 80x25 text mode
     a.label('main')
-    a.mov_r8(AL, 0x0B); a.st_al('attr')          # acik cyan
+    a.mov_r8(AL, 0x0B); a.st_al('attr')          # light cyan
     a.call('cls')
     a.mov_r16_label(SI, 'banner'); a.call('print')
     a.call('getkey')
@@ -175,19 +175,19 @@ def kernel():
     a.call('getkey')
     a.jmp('main')
 
-    # ---- cls: ekrani attr renginde temizle, imleci basa al ----
+    # ---- cls: clear the screen with the attr color, move the cursor to the top ----
     a.label('cls')
     a.raw(0x31, 0xC0)                             # xor ax,ax
     a.mov_r16(AX, 0x0600)
     a.mov_r8(BH, 0x00)
     a.raw(0x8A, 0x3E); a.ref_abs('attr')          # mov bh,[attr]
-    a.raw(0x80, 0xE7, 0x70)                       # and bh,0x70  (sadece arka plan: siyah kalir)
+    a.raw(0x80, 0xE7, 0x70)                       # and bh,0x70  (background only: stays black)
     a.mov_r16(CX, 0x0000); a.mov_r16(DX, 0x184F)
     a.int_(0x10)
     a.mov_r8(AH, 0x02); a.mov_r8(BH, 0x00); a.mov_r16(DX, 0x0000); a.int_(0x10)
     a.ret()
 
-    # ---- putc: al karakterini attr rengiyle yaz ----
+    # ---- putc: write the character in al using the attr color ----
     a.label('putc')
     a.cmp_al(0x0D); a.je('putc_raw')
     a.cmp_al(0x0A); a.je('putc_raw')
@@ -196,7 +196,7 @@ def kernel():
     a.mov_r8(AH, 0x0E); a.mov_r8(BH, 0x00); a.int_(0x10)
     a.ret()
 
-    # ---- print: si'deki 0 sonlu metni yaz ----
+    # ---- print: write the 0-terminated string at si ----
     a.label('print')
     a.raw(0xAC)                                   # lodsb
     a.raw(0x08, 0xC0)                             # or al,al
@@ -217,7 +217,7 @@ def kernel():
     a.raw(0x88, 0xE0); a.raw(0x30, 0xE4)          # mov al,ah ; xor ah,ah
     a.ret()
 
-    # ---- pick: bx=adet, cx=tablo -> si = rastgele metin ----
+    # ---- pick: bx=count, cx=table -> si = random string ----
     a.label('pick')
     a.call('rand')
     a.raw(0x31, 0xD2)                             # xor dx,dx
@@ -228,9 +228,9 @@ def kernel():
     a.raw(0x8B, 0x37)                             # mov si,[bx]
     a.ret()
 
-    # ---- getkey: tus bekle, zamanlayiciyi tohuma kat ----
+    # ---- getkey: wait for a key, mix the timer into the seed ----
     a.label('getkey')
-    a.mov_r8(AH, 0x00); a.int_(0x16)              # tus oku (al = karakter)
+    a.mov_r8(AH, 0x00); a.int_(0x16)              # read key (al = character)
     a.raw(0x50)                                   # push ax
     a.mov_r8(AH, 0x00); a.int_(0x1A)              # BIOS tick -> dx
     a.ld_ax('seed'); a.raw(0x31, 0xD0)            # xor ax,dx
@@ -238,7 +238,7 @@ def kernel():
     a.raw(0x58)                                   # pop ax
     a.ret()
 
-    # ---- veri ----
+    # ---- data ----
     a.label('attr'); a.raw(0x07)
     a.label('seed'); a.w(0x1234)
 
@@ -280,7 +280,7 @@ def bootsector(nsec):
     a.ld_dl('drive')
     a.mov_r16(BX, KBASE)
     a.int_(0x13)
-    a.jmp('far')                                   # (hata kontrolu yok; basit tutuldu)
+    a.jmp('far')                                   # (no error checking; kept simple)
     a.label('far')
     a.raw(0xEA); a.w(KBASE); a.w(0x0000)           # jmp 0000:7E00
     a.label('drive'); a.raw(0x00)
@@ -294,6 +294,6 @@ if __name__ == '__main__':
     nsec = math.ceil(len(k) / 512)
     assert nsec <= 17
     img = bootsector(nsec) + k.ljust(nsec * 512, b'\0')
-    img = img.ljust(1474560, b'\0')                # 1.44MB disket
+    img = img.ljust(1474560, b'\0')                # 1.44MB floppy
     open('XenonOS.img', 'wb').write(img)
     print(f'XenonOS.img hazir: cekirdek {len(k)} bayt, {nsec} sektor')

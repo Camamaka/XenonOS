@@ -1,6 +1,6 @@
 #!/bin/sh
-# XenonOS (Debian 13 "trixie" + KDE Plasma) live-build yapilandirmasi.
-# Kullanim: cd live-build && sudo lb config   (lb build ile ISO uretilir)
+# XenonOS (Debian 13 "trixie" + KDE Plasma) live-build configuration.
+# Usage: cd live-build && sudo lb config   (the ISO is produced with lb build)
 set -e
 
 lb config noauto \

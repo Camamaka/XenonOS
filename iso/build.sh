@@ -1,5 +1,5 @@
 #!/bin/bash
-# XenonOS ISO olusturucu (WSL / Ubuntu icinde calistir)
+# XenonOS ISO builder (run inside WSL / Ubuntu)
 set -euo pipefail
 
 VER="26.04.1"
@@ -14,7 +14,7 @@ cd "$WORK"
 sudo apt-get update
 sudo apt-get install -y xorriso curl
 
-SRC="/mnt/d/XenonOS/$ISO"   # NVMe'ye indirilmis ISO (Windows D:)
+SRC="/mnt/d/XenonOS/$ISO"   # ISO downloaded to the NVMe (Windows D:)
 if [ -f "$SRC" ]; then
     ISO="$SRC"
 elif [ ! -f "$ISO" ]; then

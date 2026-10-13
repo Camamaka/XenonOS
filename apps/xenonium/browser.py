@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Xenonium - XenonOS web tarayicisi (GTK3 + WebKitGTK 4.1)."""
+"""Xenonium - XenonOS web browser (GTK3 + WebKitGTK 4.1)."""
 import html
 import os
 import re
@@ -8,7 +8,7 @@ import time
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
 def _vm_workarounds():
-    """Sanal makinelerde WebKit'in DMABUF cizicisi bos sayfa verebilir: oralarda kapat."""
+    """In virtual machines WebKit's DMABUF renderer can produce blank pages: disable it there."""
     try:
         with open("/sys/class/dmi/id/product_name") as f:
             name = f.read().lower()
@@ -53,7 +53,7 @@ progressbar.xen-progress trough, progressbar.xen-progress progress { min-height:
 
 
 def resolve_input(text, search_url):
-    """Adres cubuguna yazilani adrese ya da aramaya cevirir."""
+    """Turns what was typed in the address bar into an address or a search."""
     t = text.strip()
     if not t:
         return NEWTAB
@@ -114,7 +114,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         self.connect("delete-event", self._on_delete)
         self.connect("key-press-event", self._on_key)
 
-    # ------------------------------------------------------------------ arayuz
+    # ------------------------------------------------------------------ UI
     def _build_ui(self):
         hb = Gtk.HeaderBar()
         hb.set_show_close_button(True)
@@ -288,7 +288,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         comp.connect("match-selected", self._on_completion_selected)
         self.entry.set_completion(comp)
 
-    # ------------------------------------------------------------------ eylemler
+    # ------------------------------------------------------------------ actions
     def _build_actions(self):
         def act(name, cb, accels=None):
             a = Gio.SimpleAction.new(name, None)
@@ -432,7 +432,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         if n:
             self.notebook.set_current_page((self.notebook.get_current_page() + d) % n)
 
-    # ------------------------------------------------------------------ sinyaller
+    # ------------------------------------------------------------------ signals
     def _is_current(self, view):
         return view is self.current_view()
 
@@ -470,7 +470,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
             pb = Gdk.pixbuf_get_from_surface(surf, 0, 0, surf.get_width(), surf.get_height())
             if pb:
                 tab.icon.set_from_pixbuf(pb.scale_simple(16, 16, GdkPixbuf.InterpType.BILINEAR))
-        except Exception:  # noqa: BLE001  (favicon alinamazsa simge kalir)
+        except Exception:  # noqa: BLE001  (keep the default icon if the favicon cannot be fetched)
             pass
 
     def _on_load_changed(self, view, event):
@@ -624,7 +624,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         else:
             self.entry.set_tooltip_text(None)
 
-    # ------------------------------------------------------------------ gorunum esitleme
+    # ------------------------------------------------------------------ view sync
     def _on_switch_page(self, nb, page, num):
         GLib.idle_add(self._sync_all, page)
 
@@ -671,7 +671,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         if v:
             v.stop_loading() if v.is_loading() else v.reload()
 
-    # ------------------------------------------------------------------ adres cubugu
+    # ------------------------------------------------------------------ address bar
     def _on_entry_activate(self, entry):
         url = resolve_input(entry.get_text(), self.app.settings.get("search_url"))
         v = self.current_view()
@@ -717,7 +717,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         self.app.bookmarks.toggle(v.get_uri(), v.get_title())
         self._sync_entry(v)
 
-    # ------------------------------------------------------------------ bul / yakinlastir / diger
+    # ------------------------------------------------------------------ find / zoom / misc
     def _show_find(self):
         self.searchbar.set_search_mode(True)
         self.find_entry.grab_focus()
@@ -806,7 +806,7 @@ class BrowserWindow(Gtk.ApplicationWindow):
         d.show_all()
         d.connect("response", lambda dlg, r: dlg.destroy())
 
-    # ------------------------------------------------------------------ indirme cubugu
+    # ------------------------------------------------------------------ download bar
     def show_download(self, text, path=None):
         self.info_label.set_text(text)
         self._info_path = path
@@ -843,7 +843,7 @@ class XenoniumApp(Gtk.Application):
         self.ext = None
         self._started = False
 
-    # ---- yasam dongusu ----
+    # ---- lifecycle ----
     def do_startup(self):
         Gtk.Application.do_startup(self)
         prov = Gtk.CssProvider()
@@ -868,7 +868,7 @@ class XenoniumApp(Gtk.Application):
         cm.set_accept_policy(WebKit2.CookieAcceptPolicy.NO_THIRD_PARTY)
         self.ctx.set_favicon_database_directory(str(store.CACHE / "favicons"))
         if not os.environ.get("XENONIUM_NO_SPELL"):
-            # yalnizca gecerli bir yerel ayar varsa ve sozluk kuruluysa yazim denetimi ac
+            # enable spell checking only if there is a valid locale and a dictionary is installed
             langs = []
             for name in GLib.get_language_names():
                 code = name.split(".")[0].split("@")[0]
@@ -897,7 +897,7 @@ class XenoniumApp(Gtk.Application):
     def do_command_line(self, cl):
         args = cl.get_arguments()[1:]
         private = "--private" in args or "--incognito" in args
-        for a in args:  # gelistirme/test: --ext-command=<eklenti>:<komut> ilk http sayfasi yuklenince calisir
+        for a in args:  # dev/test: --ext-command=<extension>:<command> runs when the first http page has loaded
             if a.startswith("--ext-command="):
                 self.test_cmd = a.split("=", 1)[1]
         urls = [a for a in args if not a.startswith("-")]
@@ -958,7 +958,7 @@ class XenoniumApp(Gtk.Application):
         self.quit()
 
     def _resolve_view(self, href):
-        """Eklenti mesajini gonderen sekmeyi bul: once ayni adresli sekme, yoksa aktif sekme."""
+        """Find the tab that sent the extension message: first the tab with the same address, otherwise the active tab."""
         win = self.get_active_window()
         wins = ([win] if isinstance(win, BrowserWindow) else []) + [w for w in self.windows_list() if w is not win]
         for w in wins:
@@ -1017,7 +1017,7 @@ class XenoniumApp(Gtk.Application):
         stream = Gio.MemoryInputStream.new_from_bytes(GLib.Bytes.new(data))
         request.finish(stream, len(data), ctype)
 
-    # ---- indirmeler ----
+    # ---- downloads ----
     def _on_download_started(self, ctx, download):
         download.connect("decide-destination", self._on_decide_destination)
         download.connect("finished", self._on_download_finished)

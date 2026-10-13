@@ -1,8 +1,8 @@
-"""Xenonium eklenti sistemi.
+"""Xenonium extension system.
 
-Her eklenti bir klasordur:  manifest.json + (content.js, content.css, icon.svg ...)
-Icerik betikleri sayfadan YALITILMIS bir JavaScript dunyasinda calisir ("xenon-ext-<id>"):
-sayfanin betikleri eklentinin degiskenlerine / xenon API'sine erisemez.
+Each extension is a folder:  manifest.json + (content.js, content.css, icon.svg ...)
+Content scripts run in a JavaScript world ISOLATED from the page ("xenon-ext-<id>"):
+the page's scripts cannot reach the extension's variables or the xenon API.
 
 manifest.json:
 {
@@ -11,14 +11,14 @@ manifest.json:
   "content_scripts": [{"matches": ["http://*/*", "https://*/*"], "js": ["content.js"], "css": ["content.css"],
                        "run_at": "document_end"}],
   "permissions": {"hosts": ["translate.googleapis.com"]},
-  "browser_action": {"title": "Sayfayi cevir", "command": "toggle-panel"}
+  "browser_action": {"title": "Translate page", "command": "toggle-panel"}
 }
 
-Eklenti JS API'si (yalnizca eklentinin kendi dunyasinda):
-  xenon.fetch(url, {method, headers, body})  -> {status, text}   (yalnizca manifestteki hosts icin)
-  xenon.storage.get(key, varsayilan) / xenon.storage.set(key, deger)
+Extension JS API (only inside the extension's own world):
+  xenon.fetch(url, {method, headers, body})  -> {status, text}   (only for the hosts in the manifest)
+  xenon.storage.get(key, default) / xenon.storage.set(key, value)
   xenon.info()                               -> {locale, version}
-  xenon.onCommand((ad, arguman) => ...)      (arac cubugu dugmesi vb. bu komutlari tetikler)
+  xenon.onCommand((name, argument) => ...)   (the toolbar button etc. trigger these commands)
 """
 import json
 import locale
@@ -112,7 +112,7 @@ class Extension:
 
 class ExtensionManager:
     def __init__(self, settings, resolve_view):
-        """resolve_view(href) -> mesaji gonderen WebView (veya None)"""
+        """resolve_view(href) -> the WebView that sent the message (or None)"""
         self.settings = settings
         self.resolve_view = resolve_view
         self.extensions = {}
@@ -121,11 +121,11 @@ class ExtensionManager:
         self._connect_handlers()
         self.apply_scripts()
 
-    # ---- yukleme ----
+    # ---- loading ----
     def load(self):
         self.extensions.clear()
         disabled = set(self.settings.get("disabled_extensions") or [])
-        for base in SYSTEM_DIRS + [USER_DIR]:  # sonraki ayni id'yi ezer (kullanici > sistem)
+        for base in SYSTEM_DIRS + [USER_DIR]:  # a later entry with the same id overrides the earlier one (user > system)
             if not base.is_dir():
                 continue
             for d in sorted(base.iterdir()):
@@ -194,7 +194,7 @@ class ExtensionManager:
             for e in self.extensions.values()
         ]
 
-    # ---- komut gonderme (arac cubugu dugmesi) ----
+    # ---- sending commands (toolbar button) ----
     def run_command(self, view, ext_id, name, arg=None):
         ext = self.extensions.get(ext_id)
         if not ext or not ext.enabled or view is None:
@@ -202,7 +202,7 @@ class ExtensionManager:
         js = f"window.__xenonCommand && window.__xenonCommand({json.dumps(name)}, {json.dumps(arg)});"
         view.evaluate_javascript(js, -1, ext.world, None, None, None)
 
-    # ---- eklentiden gelen mesajlar ----
+    # ---- messages coming from the extension ----
     def _reply(self, ext, href, mid, ok, payload):
         view = self.resolve_view(href)
         if os.environ.get("XENONIUM_DEBUG"):
@@ -237,7 +237,7 @@ class ExtensionManager:
                 self._do_fetch(ext, href, mid, args)
             else:
                 self._reply(ext, href, mid, False, f"unknown method: {method}")
-        except Exception as e:  # noqa: BLE001  (eklentiye hata olarak don)
+        except Exception as e:  # noqa: BLE001  (return it to the extension as an error)
             self._reply(ext, href, mid, False, str(e))
 
     def _do_fetch(self, ext, href, mid, args):

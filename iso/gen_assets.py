@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""XenonOS logo SVG'leri: yazi tipi gerektirmez, harfler cizgi (stroke) ile cizilir."""
+"""XenonOS logo SVGs: no font required, the letters are drawn with strokes."""
 import sys, os
 
 out = sys.argv[1]
@@ -51,18 +51,18 @@ def logo(text_color, hex_color):
 open(os.path.join(out, 'logo-light.svg'), 'w').write(logo('#0d2b3e', '#00a6c0'))
 open(os.path.join(out, 'logo-dark.svg'), 'w').write(logo('#e6faff', '#00e5ff'))
 
-# kare ikon (kurulum diski simgesi, 32x32)
+# square icon (installer disk icon, 32x32)
 icon = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
         '<rect width="32" height="32" rx="4" fill="#0d2b3e"/>'
         + hexagon(16, 16, 11, '#00e5ff', 2.4)
         + '</svg>')
 open(os.path.join(out, 'icon.svg'), 'w').write(icon)
-# semboller: uygulama izgarasi dugmesi vb. (GNOME bunlari yeniden renklendirir)
+# symbols: app grid button etc. (GNOME recolors these)
 sym = ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
        '<path fill="#bebebe" fill-rule="evenodd" d="M8 .8 14.2 4.4v7.2L8 15.2 1.8 11.6V4.4Z'
        'M8 3 12.3 5.5v5L8 13 3.7 10.5v-5Z"/><circle fill="#bebebe" cx="8" cy="8" r="1.6"/></svg>')
 open(os.path.join(out, 'symbolic.svg'), 'w').write(sym)
-# ---- uygulama simgeleri (128x128) ----
+# ---- app icons (128x128) ----
 GRAD = ('<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00e5ff"/>'
         '<stop offset="1" stop-color="#7c4dff"/></linearGradient></defs>')
 BG = '<rect width="128" height="128" rx="26" fill="#0d2b3e"/>'
@@ -72,14 +72,14 @@ def svg128(body):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">{GRAD}{BG}{body}</svg>'
 
 
-# Xenonium: yildiz/kure
+# Xenonium: star/sphere
 xenonium = svg128(
     '<g fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round">'
     '<circle cx="64" cy="64" r="40"/>'
     '<ellipse cx="64" cy="64" rx="17" ry="40"/>'
     '<path d="M24 64h80M31 42h66M31 86h66"/></g>'
     '<circle cx="64" cy="64" r="5" fill="#e6faff"/>')
-# XenonPad: not defteri
+# XenonPad: notepad
 xenonpad = svg128(
     '<rect x="30" y="22" width="68" height="86" rx="9" fill="#e6faff"/>'
     '<rect x="30" y="22" width="68" height="18" rx="9" fill="url(#g)"/>'
@@ -87,7 +87,7 @@ xenonpad = svg128(
     '<g stroke="#0d2b3e" stroke-width="5" stroke-linecap="round" opacity=".75">'
     '<path d="M42 56h44M42 70h44M42 84h30"/></g>'
     '<g fill="#e6faff"><circle cx="44" cy="22" r="4.5"/><circle cx="64" cy="22" r="4.5"/><circle cx="84" cy="22" r="4.5"/></g>')
-# XenonWriter: sayfa + W
+# XenonWriter: page + W
 xenonwriter = svg128(
     '<path d="M32 18h44l22 22v70a6 6 0 0 1-6 6H32a6 6 0 0 1-6-6V24a6 6 0 0 1 6-6z" fill="#e6faff"/>'
     '<path d="M76 18v22h22z" fill="url(#g)"/>'

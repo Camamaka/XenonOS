@@ -1,4 +1,4 @@
-"""Xenonium: kalici veri (yer imleri, gecmis, ayarlar, oturum)."""
+"""Xenonium: persistent data (bookmarks, history, settings, session)."""
 import json
 import os
 import sqlite3
@@ -134,7 +134,7 @@ class History:
         return [{"url": r[0], "title": r[1], "ts": r[2]} for r in rows]
 
     def suggest(self, text, limit=6):
-        """Adres cubugu onerileri: en cok ziyaret edilenler."""
+        """Address bar suggestions: most visited."""
         q = f"%{text}%"
         with self._lock:
             rows = self.db.execute(
@@ -163,7 +163,7 @@ class Session:
 
 
 class Downloads:
-    """Oturum boyunca indirme listesi (xenon://downloads sayfasi icin)."""
+    """Download list for the session (for the xenon://downloads page)."""
 
     def __init__(self):
         self.items = []  # {name, path, status, size}

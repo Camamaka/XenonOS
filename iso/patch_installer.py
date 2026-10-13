@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Kurulum programi (libapp.so) icindeki gorunen 'Ubuntu' metinlerini ayni uzunlukta 'Xenon ' ile degistirir.
+"""Replaces the visible 'Ubuntu' strings inside the installer (libapp.so) with 'Xenon ' of the same length.
 
-Dart snapshot'inda dizgeler birbirine bitisik durdugu icin blok uzunluguna degil, 'Ubuntu' kelimesinin
-hemen cevresine bakilir: yani bir cumlenin parcasi (oncesinde 'kelime ' veya sonrasinda ' kelime')
-olmali; 'UbuntuPage', 'ubuntu_x', yol/anahtar gibi tanimlayici baglamlarina dokunulmaz.
-Uzunluk degismedigi icin snapshot yapisi bozulmaz."""
+Strings sit back to back in the Dart snapshot, so instead of the block length we look right around the
+word 'Ubuntu': it must be part of a sentence (preceded by 'word ' or followed by ' word');
+identifier contexts such as 'UbuntuPage', 'ubuntu_x', paths and keys are left alone.
+Because the length does not change, the snapshot structure is not corrupted."""
 import sys, re
 
 path = sys.argv[1]
@@ -25,11 +25,11 @@ while True:
     end = i + len(OLD)
     before = bytes(data[max(0, i - 12):i])
     after = bytes(data[end:end + 12])
-    # hemen yaninda tanimlayici karakteri varsa (UbuntuPage, /Ubuntu, ubuntu-x ...) atla
+    # skip if an identifier character is right next to it (UbuntuPage, /Ubuntu, ubuntu-x ...)
     prev_ch = before[-1:] if before else b''
     next_ch = after[:1]
     glued = (prev_ch and IDCH.match(prev_ch)) or (next_ch and re.match(rb'[A-Za-z0-9_]', next_ch))
-    # cumle baglami: 'kelime ' + Ubuntu   veya   Ubuntu + ' ' + kucuk harf / kesme
+    # sentence context: 'word ' + Ubuntu   or   Ubuntu + ' ' + lowercase letter / apostrophe
     sentence_before = len(before) >= 2 and before[-1:] == b' ' and LETTER.match(before[-2:-1]) is not None
     sentence_after = after[:1] == b' ' and re.match(rb'[a-z\xe0-\xff]', after[1:2] or b'') is not None
     apostrophe = after[:1] in (b"'", b'\xb4')
@@ -41,7 +41,7 @@ while True:
         skipped += 1
     i = end
 
-# tek basina duran 'Ubuntu' dizgesi (surum adi sabiti: 'Welcome to <ad>' basligini besler)
+# standalone 'Ubuntu' string (release-name constant: feeds the 'Welcome to <name>' heading)
 standalone = re.compile(rb'(?<![\x20-\x7e\xa0-\xff])Ubuntu(?![\x20-\x7e\xa0-\xff])')
 data = bytearray(standalone.sub(NEW, bytes(data)))
 alone = len(standalone.findall(bytes(open(path, 'rb').read())))

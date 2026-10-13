@@ -1,5 +1,5 @@
 #!/bin/bash
-# Debian'in guncel live-build paketini (yalnizca betikler, ~200 KB) deb.debian.org'dan indirip kurar.
+# Downloads and installs Debian's current live-build package (scripts only, ~200 KB) from deb.debian.org.
 set -euo pipefail
 POOL=https://deb.debian.org/debian/pool/main/l/live-build/
 echo ">> surum araniyor: $POOL"

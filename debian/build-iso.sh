@@ -1,12 +1,12 @@
 #!/bin/bash
-# XenonOS (Debian 13 + KDE) ISO'sunu uretir.  WSL'de ROOT olarak calistir:   sudo bash build-iso.sh
+# Builds the XenonOS (Debian 13 + KDE) ISO.  Run as ROOT in WSL:   sudo bash build-iso.sh
 #
-# DIKKAT: Bu betik internetten ~1.5-3 GB Debian paketi indirir ve WSL'e live-build, debootstrap kurar.
-#         Calistirmadan once onay ver.  Cikti: D:\XenonOS\debian\out\xenonos-*.iso
+# WARNING: This script downloads ~1.5-3 GB of Debian packages and installs live-build and debootstrap into WSL.
+#         Get approval before running it.  Output: D:\XenonOS\debian\out\xenonos-*.iso
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-WORK=/root/xenonos-lb          # ext4 uzerinde calis (Windows surucusunde izinler/aygit dosyalari bozulur)
+WORK=/root/xenonos-lb          # work on ext4 (permissions/device files break on a Windows drive)
 OUT="$HERE/out"
 
 if [ "$(id -u)" != 0 ]; then echo "root olarak calistir (sudo)"; exit 1; fi
@@ -15,7 +15,7 @@ echo ">> Gerekli araclar kuruluyor (apt)..."
 apt-get update
 apt-get install -y debootstrap debian-archive-keyring squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools \
     syslinux syslinux-utils isolinux dosfstools python3 dpkg-dev librsvg2-bin
-# live-build: Debian'in guncel surumu gerekir (Ubuntu'nun 3.0~a57 paketi trixie icin cok eski)
+# live-build: needs Debian's current version (Ubuntu's 3.0~a57 package is too old for trixie)
 if ! dpkg -l live-build 2>/dev/null | awk '/^ii/ {print $3}' | grep -qE '^1:20'; then
     bash "$HERE/get-live-build.sh"
 fi
@@ -24,7 +24,7 @@ echo ">> XenonOS .deb paketleri uretiliyor..."
 bash "$HERE/build-debs.sh"
 
 echo ">> Calisma klasoru hazirlaniyor: $WORK"
-# onceki denemeden kalan bind mount'lari coz (rm -rf bunlara dokunmasin)
+# unmount bind mounts left over from a previous attempt (so rm -rf does not touch them)
 for m in $(awk -v p="$WORK/" 'index($2, p) == 1 { print $2 }' /proc/mounts | sort -r); do umount -l "$m" || true; done
 rm -rf "$WORK"
 mkdir -p "$WORK"

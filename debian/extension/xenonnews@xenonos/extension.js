@@ -1,6 +1,6 @@
-// Xenon News - XenonOS masaustu haber widget'i (sol alt).
-// - Basliktaki "Xe 54" karosuna 3 kez tiklayinca: Founders: DTA & CMK, Designer: EHA
-// - Haberler BBC World RSS'ten alinir (15 dk'da bir yenilenir); habere tiklayinca tarayicida acilir.
+// Xenon News - XenonOS desktop news widget (bottom left).
+// - Triple-clicking the "Xe 54" tile in the header shows: Founders: DTA & CMK, Designer: EHA
+// - News comes from the BBC World RSS feed (refreshed every 15 min); clicking an item opens it in the browser.
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
@@ -27,18 +27,18 @@ export default class XenonNews extends Extension {
             reactive: false,
         });
 
-        // ---- baslik: [Xe 54 karosu]  XENON NEWS ----
+        // ---- header: [Xe 54 tile]  XENON NEWS ----
         const header = new St.BoxLayout({style_class: 'xenon-news-header', vertical: false});
         this._tile = new St.Button({style_class: 'xenon-tile', reactive: true, can_focus: true, track_hover: true});
         const tileBox = new St.BoxLayout({vertical: true});
         tileBox.add_child(new St.Label({text: '54', style_class: 'xenon-tile-number'}));
         tileBox.add_child(new St.Label({text: 'Xe', style_class: 'xenon-tile-symbol'}));
         this._tile.set_child(tileBox);
-        // 3 tikla: hem Clutter'in tiklama sayaci hem kendi zamanlayicimiz (hangisi once 3'e ulasirsa)
+        // 3 clicks: both Clutter's click counter and our own timer (whichever reaches 3 first)
         this._clicks = 0;
         this._clickTimer = 0;
-        // St.Button tiklamayi kendi isler: 'button-press-event' degil 'clicked' sinyali kullanilir.
-        // 3 tiklama 800 ms icinde olursa kurucular gosterilir.
+        // St.Button handles clicks itself: use the 'clicked' signal, not 'button-press-event'.
+        // If 3 clicks happen within 800 ms, the founders are shown.
         this._tile.connect('clicked', () => {
             this._clicks++;
             if (this._clickTimer)
@@ -62,7 +62,7 @@ export default class XenonNews extends Extension {
         header.add_child(titles);
         this._box.add_child(header);
 
-        // ---- kurucular (gizli, 3 tikla acilir) ----
+        // ---- founders (hidden, opens on 3 clicks) ----
         this._credits = new St.Label({
             text: 'Founders: DTA & CMK\nDesigner: EHA',
             style_class: 'xenon-credits',
@@ -70,11 +70,11 @@ export default class XenonNews extends Extension {
         });
         this._box.add_child(this._credits);
 
-        // ---- haber listesi ----
+        // ---- news list ----
         this._list = new St.BoxLayout({vertical: true, style_class: 'xenon-news-list'});
         this._box.add_child(this._list);
 
-        // masaustu katmani: pencerelerin altinda, duvar kagidinin ustunde
+        // desktop layer: below windows, above the wallpaper
         Main.layoutManager._backgroundGroup.add_child(this._box);
         this._reposition();
         this._allocId = this._box.connect('notify::allocation', () => this._reposition());

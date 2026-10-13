@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Uygulama arayuz metinlerini (Python dize sabitleri) Turkceden Ingilizceye cevirir.
+"""Translates application UI strings (Python string constants) from Turkish to English.
 
-  python3 translate_ui.py report <dosyalar...>   -> aday metinler + onerilen ceviri tablosu (translate_map.json)
-  python3 translate_ui.py apply  <dosyalar...>   -> translate_map.json'u (elle duzeltilmis halini) kaynaga uygular
+  python3 translate_ui.py report <files...>   -> candidate strings + suggested translation table (translate_map.json)
+  python3 translate_ui.py apply  <files...>   -> applies translate_map.json (the hand-corrected version) to the sources
 
-Ceviri servisi: translate.googleapis.com (gtx). Sonuc elle gozden gecirilmelidir.
+Translation service: translate.googleapis.com (gtx). The result must be reviewed by hand.
 """
 import ast
 import json
@@ -42,7 +42,7 @@ def candidates(path):
             continue
         if "\n" in s and len(s) > 120:
             continue
-        # tek kucuk harfli kelime (kod simgesi) degilse UI metni say
+        # count it as UI text unless it is a single lowercase word (code identifier)
         if " " not in s and s[0].islower():
             continue
         out[s] = out.get(s, 0) + 1
@@ -70,11 +70,11 @@ def report(files):
         except Exception as e:  # noqa: BLE001
             t = s
             print("HATA", s, e, file=sys.stderr)
-        # bas/son bosluklari ve satir sonlarini koru
+        # preserve leading/trailing whitespace and line endings
         lead = re.match(r"^\s*", s).group(0)
         trail = re.search(r"\s*$", s).group(0)
         t = lead + t.strip() + trail
-        # buyuk/kucuk harf ve noktalama kuralini yaklasik koru
+        # approximately preserve capitalization and punctuation
         if s.rstrip().endswith(":") and not t.rstrip().endswith(":"):
             t = t.rstrip() + ":" + trail
         result[s] = t
@@ -89,7 +89,7 @@ def apply(files):
         src = open(path, encoding="utf-8").read()
         tree = ast.parse(src)
         lines = src.split("\n")
-        # satir/sutun bazinda sondan basa dogru degistir
+        # replace by line/column, from the end to the start
         repl = []
         for n in ast.walk(tree):
             if isinstance(n, ast.Constant) and isinstance(n.value, str) and n.value in m and m[n.value] != n.value:
@@ -98,12 +98,12 @@ def apply(files):
                 repl.append((n.lineno - 1, n.col_offset, n.end_col_offset, n.value))
         repl.sort(key=lambda r: (r[0], r[1]), reverse=True)
         done = 0
-        # ast sutun konumlari UTF-8 BAYT cinsindendir: satirlari bayt olarak isle
+        # ast column offsets are in UTF-8 BYTES: process lines as bytes
         blines = [l.encode("utf-8") for l in lines]
         for ln, c0, c1, val in repl:
             seg = blines[ln][c0:c1].decode("utf-8")
             if not (seg.startswith('"') or seg.startswith("'")):
-                # f-string parcasi: dilim yalniz sabit kisim olabilir; tirnaksiz parcayi dogrudan degistir
+                # f-string part: the slice can only be the constant part; replace the unquoted part directly
                 if seg == val or seg == val.replace("\n", "\\n"):
                     new = m[val].replace("\\", "\\\\").replace("\n", "\\n").encode("utf-8")
                     blines[ln] = blines[ln][:c0] + new + blines[ln][c1:]
@@ -114,7 +114,7 @@ def apply(files):
             blines[ln] = blines[ln][:c0] + (q + new + q).encode("utf-8") + blines[ln][c1:]
             done += 1
         text = "\n".join(b.decode("utf-8") for b in blines)
-        ast.parse(text)          # sozdizimi kontrolu: bozuksa DOSYAYA YAZMA
+        ast.parse(text)          # syntax check: if broken, DO NOT WRITE the file
         open(path, "w", encoding="utf-8").write(text)
         print(f"{path}: {done} metin degistirildi")
 

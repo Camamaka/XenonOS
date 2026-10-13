@@ -1,5 +1,5 @@
 version: 1
-# Bu bolumler kurulum ekraninda sana sorulur, gerisi otomatik gecer.
+# These sections are asked on the installer screen; the rest proceeds automatically.
 interactive-sections:
   - locale
   - keyboard
@@ -20,7 +20,7 @@ late-commands:
     if [ -n "$PKG" ]; then
       curtin in-target --target=/target -- apt-get update
       curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive apt-get install -y $PKG
-      # masaustu kurulunca ag yonetimi NetworkManager'a gecsin
+      # once the desktop is installed, switch network management to NetworkManager
       printf 'network:\n  version: 2\n  renderer: NetworkManager\n' > /target/etc/netplan/90-xenonos.yaml
       chmod 600 /target/etc/netplan/90-xenonos.yaml
     fi

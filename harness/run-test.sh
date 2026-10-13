@@ -1,8 +1,8 @@
 #!/bin/bash
-# Gorsel test duzenegi: ISO'nun taban dosya sistemini (/root/work/rootfs) chroot ile acar,
-# WSLg ekranini icine baglar ve uygulamayi Windows masaustunde calistirir.
-# GUVENLIK: yalnizca /proc /sys /dev /tmp/.X11-unix /mnt/wslg baglanir (uygulama kaynaklari BAGLANMAZ).
-# Isi bitince unbind.sh calistir; derleme betigi de rootfs'i silmeden once bunlari cozer.
+# Visual test harness: opens the ISO's base filesystem (/root/work/rootfs) with chroot,
+# binds the WSLg display into it and runs the app on the Windows desktop.
+# SAFETY: only /proc /sys /dev /tmp/.X11-unix /mnt/wslg are bound (application sources are NOT bound).
+# Run unbind.sh when done; the build script also unbinds these before deleting rootfs.
 set -e
 R=/root/work/rootfs
 mountpoint -q $R/proc || mount -t proc proc $R/proc

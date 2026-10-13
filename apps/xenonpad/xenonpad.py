@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""XenonPad - XenonOS metin duzenleyicisi (GTK4 + libadwaita).
+"""XenonPad - XenonOS text editor (GTK4 + libadwaita).
 
-Sekmeler, bul/degistir, satira git, kelime kaydirma, yakinlastirma, otomatik girinti,
-kaydedilmemis degisiklik korumasi, cokme sonrasi kurtarma kopyalari, surukle-birak ile acma.
+Tabs, find/replace, go to line, word wrap, zoom, auto-indent,
+unsaved-changes protection, crash-recovery copies, opening by drag and drop.
 """
 import os
 import sys
@@ -49,7 +49,7 @@ def save_prefs(p):
 
 
 class Doc:
-    """Bir sekmenin belgesi."""
+    """The document of a tab."""
 
     def __init__(self, page, view, buf, file=None):
         self.page, self.view, self.buf, self.file = page, view, buf, file
@@ -80,7 +80,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         GLib.timeout_add_seconds(20, self._write_recovery)
         self.connect("close-request", self._on_close_request)
 
-    # ------------------------------------------------------------------ arayuz
+    # ------------------------------------------------------------------ UI
     def _build(self):
         self.toast = Adw.ToastOverlay()
         tv = Adw.ToolbarView()
@@ -107,7 +107,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         tabbar = Adw.TabBar(view=self.tabview, autohide=False)
         tv.add_top_bar(tabbar)
 
-        # bul / degistir cubugu
+        # find / replace bar
         self.searchbar = Gtk.SearchBar()
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         row1 = Gtk.Box(spacing=6)
@@ -149,7 +149,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         self.tabview.set_vexpand(True)
         content.append(self.tabview)
 
-        # durum cubugu
+        # status bar
         status = Gtk.Box(spacing=18)
         status.add_css_class("xp-status")
         self.lbl_pos = Gtk.Label(label="Ln 1, Col 1")
@@ -164,7 +164,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         self.toast.set_child(tv)
         self.set_content(self.toast)
 
-        # surukle-birak
+        # drag and drop
         drop = Gtk.DropTarget.new(Gdk.FileList, Gdk.DragAction.COPY)
         drop.connect("drop", self._on_drop)
         self.tabview.add_controller(drop)
@@ -222,7 +222,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         act("prev-tab", lambda *_: self.tabview.select_previous_page(), ["<Primary>Page_Up", "<Primary><Shift>Tab"])
         act("escape", lambda *_: self.searchbar.set_search_mode(False), ["Escape"])
 
-    # ------------------------------------------------------------------ yazi tipi / yakinlastirma
+    # ------------------------------------------------------------------ font / zoom
     def _apply_font(self):
         size = max(6, round(11 * self.zoom, 1))
         self._css.load_from_data(
@@ -244,7 +244,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         for d in self.docs.values():
             d.view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR if self.wrap else Gtk.WrapMode.NONE)
 
-    # ------------------------------------------------------------------ sekmeler / belgeler
+    # ------------------------------------------------------------------ tabs / documents
     def current(self):
         page = self.tabview.get_selected_page()
         return self.docs.get(page) if page else None
@@ -314,7 +314,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
 
     def _on_key(self, ctrl, keyval, keycode, state, doc):
         buf = doc.buf
-        # otomatik girinti
+        # auto-indent
         if keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter) and not (state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.ALT_MASK)):
             it = buf.get_iter_at_mark(buf.get_insert())
             ls = it.copy()
@@ -328,7 +328,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
                 buf.end_user_action()
                 doc.view.scroll_mark_onscreen(buf.get_insert())
                 return True
-        # Shift+Tab: girintiyi azalt, secili cok satirda Tab: girintiyi artir
+        # Shift+Tab: decrease indent; Tab on a multi-line selection: increase indent
         if keyval in (Gdk.KEY_Tab, Gdk.KEY_ISO_Left_Tab):
             if buf.get_has_selection():
                 s, e = buf.get_selection_bounds()
@@ -361,7 +361,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
                 buf.insert(it, "    ")
         buf.end_user_action()
 
-    # ------------------------------------------------------------------ dosya islemleri
+    # ------------------------------------------------------------------ file operations
     def open_dialog(self):
         dlg = Gtk.FileDialog(title="Open file")
         dlg.open_multiple(self, None, self._on_open_done)
@@ -480,7 +480,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
             self.open_file(f)
         return True
 
-    # ------------------------------------------------------------------ kapatma korumasi
+    # ------------------------------------------------------------------ close protection
     def _on_close_page(self, tabview, page):
         d = self.docs.get(page)
         if d and d.modified and (d.buf.get_char_count() > 0 or d.file):
@@ -538,7 +538,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         for d in self.docs.values():
             self._remove_recovery(d)
 
-    # ------------------------------------------------------------------ kurtarma kopyalari
+    # ------------------------------------------------------------------ recovery copies
     def _write_recovery(self):
         for d in self.docs.values():
             if d.modified and d.buf.get_char_count() > 0:
@@ -556,7 +556,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
         except OSError:
             pass
 
-    # ------------------------------------------------------------------ bul / degistir
+    # ------------------------------------------------------------------ find / replace
     def _toggle_find(self):
         on = not self.searchbar.get_search_mode()
         self.searchbar.set_search_mode(on)
@@ -642,7 +642,7 @@ class XenonPadWindow(Adw.ApplicationWindow):
             buf.end_user_action()
         self.find_info.set_text(f"{n} replacements made")
 
-    # ------------------------------------------------------------------ satira git / donusumler
+    # ------------------------------------------------------------------ go to line / transformations
     def goto_dialog(self):
         d = self.current()
         if not d:

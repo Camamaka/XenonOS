@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""XenonWriter - XenonOS kelime islemcisi (GTK3 + WebKitGTK 4.1, gercek zengin metin duzenleme).
+"""XenonWriter - XenonOS word processor (GTK3 + WebKitGTK 4.1, real rich-text editing).
 
-Bicimlendirme (kalin/italik/altini cizili/ustu cizili, yazi tipi + boyut, renk, vurgu, hizalama, listeler,
-basliklar, alinti, kod), baglanti, resim, tablo, yatay cizgi, bul, yakinlastirma, A4 sayfa gorunumu,
-HTML / metin olarak kaydetme, PDF'e aktarma, yazdirma.
+Formatting (bold/italic/underline/strikethrough, font + size, color, highlight, alignment, lists,
+headings, quote, code), links, images, tables, horizontal rule, find, zoom, A4 page view,
+saving as HTML / text, PDF export, printing.
 """
 import json
 import os
@@ -76,7 +76,7 @@ def plain_to_html(text):
 
 
 def extract_body(doc):
-    """Acilan .html dosyasindan duzenlenecek govdeyi al."""
+    """Get the body to edit from the opened .html file."""
     m = re.search(r'<div id="xenonwriter-page">(.*)</div>\s*</body>', doc, re.S | re.I)
     if m:
         return m.group(1)
@@ -101,7 +101,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         self._refresh_title()
         self.connect("delete-event", self._on_delete)
 
-    # ------------------------------------------------------------------ arayuz
+    # ------------------------------------------------------------------ UI
     def _tb(self, icon, tip, cb=None, toggle=False, label=None):
         b = Gtk.ToggleButton() if toggle else Gtk.Button()
         if label:
@@ -137,7 +137,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(vbox)
 
-        # ---- arac cubugu (iki satir) ----
+        # ---- toolbar (two rows) ----
         tb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         tb.get_style_context().add_class("xw-toolbar")
         r1 = Gtk.Box(spacing=4)
@@ -218,7 +218,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         r2.pack_start(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL), False, False, 6)
         r2.pack_start(self._tb("edit-clear-all-symbolic", "Clear formatting", lambda *_: self.js("xw.clear()")), False, False, 0)
 
-        # ---- bul cubugu ----
+        # ---- find bar ----
         self.searchbar = Gtk.SearchBar()
         sb = Gtk.Box(spacing=6)
         self.find_entry = Gtk.SearchEntry()
@@ -236,7 +236,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         b_prev.connect("clicked", lambda *_: self._find_step(False))
         vbox.pack_start(self.searchbar, False, False, 0)
 
-        # ---- web gorunumu ----
+        # ---- web view ----
         ucm = WebKit2.UserContentManager()
         ucm.register_script_message_handler("xw")
         ucm.connect("script-message-received::xw", self._on_message)
@@ -253,7 +253,7 @@ class WriterWindow(Gtk.ApplicationWindow):
             self.view.load_html(f.read(), "file:///xenonwriter/")
         vbox.pack_start(self.view, True, True, 0)
 
-        # ---- durum cubugu ----
+        # ---- status bar ----
         st = Gtk.Box(spacing=18)
         st.get_style_context().add_class("xw-status")
         self.lbl_words = Gtk.Label(label="0 words", xalign=0)
@@ -312,7 +312,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         act("zoom-reset", lambda: self._zoom(0), ["<Primary>0"])
         act("close", self.close, ["<Primary>w"])
 
-    # ------------------------------------------------------------------ JS koprusu
+    # ------------------------------------------------------------------ JS bridge
     def js(self, code, cb=None):
         if cb is None:
             self.view.evaluate_javascript(code, -1, None, None, None, None)
@@ -372,7 +372,7 @@ class WriterWindow(Gtk.ApplicationWindow):
             return
         self.js(f"xw.setHTML({json.dumps(body)})")
 
-    # ------------------------------------------------------------------ arac cubugu olaylari
+    # ------------------------------------------------------------------ toolbar events
     @staticmethod
     def _hex(btn):
         c = btn.get_rgba()
@@ -419,7 +419,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         if 1 <= v <= 400:
             self.js(f"xw.fontSize({v})")
 
-    # ------------------------------------------------------------------ iletisim kutulari
+    # ------------------------------------------------------------------ dialogs
     def link_dialog(self):
         def got(sel):
             d = Gtk.Dialog(title="Link", transient_for=self, modal=True)
@@ -487,7 +487,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         d.run()
         d.destroy()
 
-    # ------------------------------------------------------------------ bul / yakinlastir
+    # ------------------------------------------------------------------ find / zoom
     def _show_find(self):
         self.searchbar.set_search_mode(True)
         self.find_entry.grab_focus()
@@ -512,7 +512,7 @@ class WriterWindow(Gtk.ApplicationWindow):
         self.view.set_zoom_level(z)
         self.lbl_zoom.set_text(f"%{round(z * 100)}")
 
-    # ------------------------------------------------------------------ dosya islemleri
+    # ------------------------------------------------------------------ file operations
     @property
     def name(self):
         return os.path.basename(self.file) if self.file else "Untitled document"
@@ -665,7 +665,7 @@ class WriterWindow(Gtk.ApplicationWindow):
     def print_doc(self):
         WebKit2.PrintOperation.new(self.view).run_dialog(self)
 
-    # ------------------------------------------------------------------ yonlendirme / kapanis
+    # ------------------------------------------------------------------ routing / shutdown
     def _on_policy(self, view, decision, dtype):
         PD = WebKit2.PolicyDecisionType
         if dtype in (PD.NAVIGATION_ACTION, PD.NEW_WINDOW_ACTION):

@@ -18,7 +18,7 @@
     ["sv", "Svenska"], ["cs", "Čeština"], ["ro", "Română"], ["hu", "Magyar"], ["bg", "Български"],
     ["az", "Azərbaycanca"], ["da", "Dansk"], ["fi", "Suomi"], ["no", "Norsk"], ["vi", "Tiếng Việt"], ["th", "ไทย"]
   ];
-  var SEP = "\n⁣\n";           // gorunmez ayirici: toplu cevirinin parcalarini ayirir
+  var SEP = "\n⁣\n";           // invisible separator: splits the parts of a batched translation
   var SKIP_TAGS = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, CODE: 1, PRE: 1, TEXTAREA: 1, INPUT: 1, SELECT: 1, SVG: 1, MATH: 1, KBD: 1, SAMP: 1 };
   var BATCH_CHARS = 1200, PARALLEL = 3;
 
@@ -40,7 +40,7 @@
     });
   }
   function mymemory(text, target) {
-    // yalnizca kisa metin icin yedek servis; en fazla ~450 karakterlik parcalar
+    // fallback service for short text only; chunks of at most ~450 characters
     var chunks = [], cur = "";
     text.split(/(?<=[.!?\n])\s+/).forEach(function (s) {
       if ((cur + " " + s).length > 450 && cur) { chunks.push(cur); cur = s; } else { cur = cur ? cur + " " + s : s; }
@@ -210,13 +210,13 @@
     if (parts.length !== 3 * K + 1) return false;
     var segs = [], contents = [];
     for (var i = 0; i < K; i++) {
-      if (parseInt(parts[1 + 3 * i], 10) !== i + 1 || !parts[2 + 3 * i].trim()) return false;   // sira bozuk / bos etiket
+      if (parseInt(parts[1 + 3 * i], 10) !== i + 1 || !parts[2 + 3 * i].trim()) return false;   // order is broken / empty tag
       contents.push(parts[2 + 3 * i]);
     }
     for (var j = 0; j <= K; j++) segs.push(parts[3 * j]);
     var slots = [], cur = 0;
     u.items.forEach(function (it) { if (it.plain) slots[cur] = it; else cur++; });
-    for (var s = 0; s <= K; s++) if (!slots[s] && segs[s].replace(/[\s.,;:!?'"()\-–—]+/g, "") !== "") return false; // duz metin dugumu olmayan yere metin dustu
+    for (var s = 0; s <= K; s++) if (!slots[s] && segs[s].replace(/[\s.,;:!?'"()\-–—]+/g, "") !== "") return false; // text landed where there is no plain-text node
     for (var s2 = 0; s2 <= K; s2++) {
       var run = slots[s2]; if (!run) continue;
       var seg = segs[s2].replace(/\s+/g, " ");
@@ -263,7 +263,7 @@
   }
   function makeBatches(nodes) {
     var units = makeUnits(nodes);
-    // gorunur olanlar once
+    // visible ones first
     units.sort(function (a, b) { return (inView(b.nodes[0]) ? 1 : 0) - (inView(a.nodes[0]) ? 1 : 0); });
     var batches = [], cur = [], len = 0;
     units.forEach(function (u) {
@@ -276,7 +276,7 @@
   function applyUnit(u, translated, target) {
     if (u.kind === "single") { setNode(u.nodes[0], translated.replace(/^\s+|\s+$/g, "") || u.nodes[0].nodeValue.trim()); return Promise.resolve(); }
     if (u.kind === "sentence") {
-      // bagsiz bicimlendirme (kalin/italik...) iceren cumle: butun olarak cevrilir, ilk parcaya konur
+      // sentence containing standalone formatting (bold/italic...): translated as a whole and placed in the first part
       var full = translated.replace(/^\s+|\s+$/g, "");
       if (!full) return Promise.resolve();
       setNode(u.nodes[0], full);
@@ -284,7 +284,7 @@
       return Promise.resolve();
     }
     if (applyTags(u, translated)) return Promise.resolve();
-    // etiketler bozulduysa: parcalari tek tek cevir
+    // if the tags were corrupted: translate the parts one by one
     return Promise.all(u.nodes.map(function (n) {
       var c = n.nodeValue.trim();
       return gtx(c, target).then(function (x) { setNode(n, x.text.replace(/^\s+|\s+$/g, "") || c); }).catch(function () {});
@@ -295,7 +295,7 @@
     return gtx(units.map(function (u) { return u.text; }).join(SEP), target).then(function (r) {
       if (r.lang && !state.detected) state.detected = r.lang;
       var parts = r.text.split(SEP);
-      if (parts.length !== units.length) {            // ayirici bozulduysa birimleri tek tek dene
+      if (parts.length !== units.length) {            // if the separator was corrupted, try the units one by one
         return Promise.all(units.map(function (u) {
           return gtx(u.text, target).then(function (x) { return applyUnit(u, x.text, target); }).catch(function () {});
         }));

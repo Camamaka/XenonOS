@@ -1,6 +1,6 @@
 #!/bin/bash
-# XenonOS masaustu ISO'su v2 (WSL'de root olarak calistir)
-# Taban katman: marka, uygulama adlari, Firefox, tema.  Canli katman: kurulum programi.
+# XenonOS desktop ISO v2 (run as root in WSL)
+# Base layer: branding, app names, Firefox, theme.  Live layer: installer.
 set -euo pipefail
 
 SRC_ISO="${SRC_ISO:-/mnt/e/ubuntu-26.04-desktop-amd64.iso}"
@@ -8,7 +8,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 W=/root/work
 OUT="${OUT:-/mnt/d/XenonOS/XenonOS-Desktop.iso}"
 
-# kaynak ISO (Ventoy USB'si E: ise WSL'de elle baglanmasi gerekebilir)
+# source ISO (if it is on the Ventoy USB at E:, it may need to be mounted manually in WSL)
 case "$SRC_ISO" in
     /mnt/e/*) mkdir -p /mnt/e; mountpoint -q /mnt/e || mount -t drvfs E: /mnt/e 2>/dev/null || true ;;
 esac
@@ -20,8 +20,8 @@ fi
 apt-get install -y squashfs-tools xorriso librsvg2-bin fonts-dejavu-core dconf-cli python3 >/dev/null
 mkdir -p "$W"; cd "$W"
 
-# GUVENLIK: test icin chroot'a baglanmis (bind) klasorler varsa once coz; aksi halde 'rm -rf rootfs'
-# bagli klasorlerin (uygulama kaynaklari, /dev, /mnt/wslg ...) GERCEK icerigini de siler.
+# SAFETY: if folders were bind-mounted into the chroot for testing, unmount them first; otherwise 'rm -rf rootfs'
+# also deletes the REAL contents of the mounted folders (app sources, /dev, /mnt/wslg ...).
 for m in $(awk -v p="$W/rootfs/" 'index($2, p) == 1 { print $2 }' /proc/mounts | sort -r); do
     umount -l "$m" 2>/dev/null || true
 done
@@ -30,10 +30,10 @@ if awk -v p="$W/rootfs/" 'index($2, p) == 1 { f = 1 } END { exit !f }' /proc/mou
     exit 1
 fi
 
-# ---------------------------------------------------------------- yardimcilar
-# .desktop dosyasinda yalniz ust duzey Name= degistirilir (Name[xx]= ceviri satirlari silinir,
-# [Desktop Action ...] bolumlerine dokunulmaz)
-rename_desktop() {   # $1=dosya  $2=yeni ad  $3=(istege bagli) yeni aciklama
+# ---------------------------------------------------------------- helpers
+# In a .desktop file only the top-level Name= is changed (Name[xx]= translation lines are removed,
+# [Desktop Action ...] sections are left untouched)
+rename_desktop() {   # $1=file  $2=new name  $3=(optional) new description
     local f="$1" n="$2" c="${3:-}"
     [ -f "$f" ] || return 0
     awk -v n="$n" -v c="$c" '
@@ -43,10 +43,10 @@ rename_desktop() {   # $1=dosya  $2=yeni ad  $3=(istege bagli) yeni aciklama
         { print }' "$f" > "$f.tmp" && cat "$f.tmp" > "$f" && rm -f "$f.tmp"
 }
 
-# ---------------------------------------------------------------- logolar
+# ---------------------------------------------------------------- logos
 rm -rf assets && python3 "$HERE/gen_assets.py" assets
 
-# ================================================================ TABAN KATMAN
+# ================================================================ BASE LAYER
 if [ "${SKIP_BASE:-0}" = 1 ] && [ -f minimal.xenon.squashfs ]; then
 echo ">> Taban katman atlandi (SKIP_BASE=1, mevcut dosya kullaniliyor)"
 else
@@ -85,9 +85,9 @@ cp wall.png "$B/xenonos.png"
 
 echo ">> Surum adi / GRUB / logo..."
 sed -i 's|^PRETTY_NAME=.*|PRETTY_NAME="XenonOS 1.0 (Ubuntu 26.04 LTS)"|' $R/usr/lib/os-release
-sed -i 's|^NAME=.*|NAME="XenonOS"|' $R/usr/lib/os-release   # ID/ID_LIKE ayni kalir (apt, snap, pro)
+sed -i 's|^NAME=.*|NAME="XenonOS"|' $R/usr/lib/os-release   # ID/ID_LIKE stay the same (apt, snap, pro)
 echo 'XENONOS_VERSION="1.0"' >> $R/usr/lib/os-release
-# Ubuntu logo ve simgelerini XenonOS ile degistir (kurulum simgesi, uygulama izgarasi dugmesi, hakkinda logosu)
+# Replace Ubuntu logos and icons with XenonOS ones (installer icon, app grid button, about logo)
 find $R/usr/share/icons $R/usr/share/pixmaps -type f \( -iname '*ubiquity*' -o -iname 'ubuntu-logo*' -o -iname 'view-app-grid-ubuntu*' -o -iname 'start-here*' \) 2>/dev/null | while read -r f; do
     b=$(basename "$f")
     case "$f" in
@@ -104,7 +104,7 @@ echo 'XenonOS 1.0 (Ubuntu 26.04 LTS)' > $R/etc/issue.net
 sed -i 's|^GRUB_DISTRIBUTOR=.*|GRUB_DISTRIBUTOR="XenonOS"|' $R/etc/default/grub
 mkdir -p $R/usr/share/xenonos
 cp assets/*.svg $R/usr/share/xenonos/
-# Plymouth (kurulu sistemin initramfs'i bunlardan uretilir)
+# Plymouth (the installed system's initramfs is generated from these)
 for f in $(find $R/usr/share/plymouth -type f \( -iname '*watermark*' -o -iname '*ubuntu-logo*' \) 2>/dev/null); do
     dims=$(python3 -c "import struct,sys; d=open(sys.argv[1],'rb').read(32); print(*struct.unpack('>II', d[16:24]))" "$f")
     set -- $dims
@@ -178,7 +178,7 @@ StartupWMClass=xenonwriter
 StartupNotify=true
 Keywords=yazi;belge;word;writer;kelime;
 EOF
-# varsayilan tarayici / metin duzenleyici
+# default browser / text editor
 mkdir -p $R/etc/xdg $R/etc/alternatives
 for alt in x-www-browser gnome-www-browser www-browser; do
     ln -sfn /usr/bin/xenonium "$R/etc/alternatives/$alt"
@@ -294,7 +294,7 @@ echo ">> Snap uygulama adlarini Xenon yapan servis..."
 mkdir -p $R/usr/local/bin
 cat > $R/usr/local/bin/xenon-brand <<'EOF'
 #!/bin/sh
-# snapd'nin urettigi .desktop dosyalarinda gorunen adlari XenonOS adlarina cevirir (idempotent)
+# Translates the names shown in snapd-generated .desktop files to XenonOS names (idempotent)
 D=/var/lib/snapd/desktop/applications
 rn() {
     f="$D/$1"; [ -f "$f" ] || return 0
@@ -346,7 +346,7 @@ rm -f minimal.xenon.squashfs
 mksquashfs $R minimal.xenon.squashfs -comp xz -b 131072 -noappend -no-progress
 fi
 
-# ================================================================ STANDART KATMAN (LibreOffice, Takvim, Video ...)
+# ================================================================ STANDARD LAYER (LibreOffice, Calendar, Video ...)
 if [ "${SKIP_STD:-0}" = 1 ] && [ -f minimal.standard.xenon.squashfs ]; then
 echo ">> Standart katman atlandi (SKIP_STD=1)"
 else
@@ -377,7 +377,7 @@ rm -f minimal.standard.xenon.squashfs
 mksquashfs stdfs minimal.standard.xenon.squashfs -comp xz -b 131072 -noappend -no-progress
 fi
 
-# ================================================================ CANLI KATMAN (kurulum programi)
+# ================================================================ LIVE LAYER (installer)
 echo ">> Canli katman aciliyor..."
 [ -f live.squashfs ] || xorriso -osirrox on -indev "$SRC_ISO" -extract /casper/minimal.standard.live.squashfs live.squashfs
 rm -rf livefs; unsquashfs -f -d livefs live.squashfs >/dev/null
@@ -390,7 +390,7 @@ for f in assets/welcome/logo-light.svg assets/welcome/logo-dark.svg \
     cp "assets/$(basename $f)" "$FA/$f"
 done
 cp assets/icon.svg "$FA/assets/storage/ubuntu.svg"
-# kurulum programi simgesi (menude gorunen Ubuntu logosu)
+# installer icon (the Ubuntu logo shown in the menu)
 ICON=$(grep -m1 '^Icon=' inst/meta/gui/ubuntu-desktop-bootstrap.desktop | cut -d= -f2- | sed "s|\${SNAP}|inst|")
 if [ -n "$ICON" ] && [ -f "$ICON" ]; then
     case "$ICON" in
@@ -402,7 +402,7 @@ if [ -n "$ICON" ] && [ -f "$ICON" ]; then
 fi
 python3 "$HERE/patch_installer.py" inst/bin/lib/libapp.so
 rename_desktop livefs/usr/share/applications/gparted.desktop "Xenon Bolumleyici" "XenonOS disk bolumleme"
-# masaustundeki "Install RELEASE" kisayolu
+# the "Install RELEASE" shortcut on the desktop
 rename_desktop livefs/var/lib/snapd/desktop/applications/ubuntu-desktop-bootstrap_ubuntu-desktop-bootstrap.desktop "XenonOS Kur"
 rename_desktop inst/meta/gui/ubuntu-desktop-bootstrap.desktop "XenonOS Kur"
 SQ_COMP=$(unsquashfs -s "livefs/var/lib/snapd/seed/snaps/$SNAP_REL" | awk '/^Compression/{print $2}')
@@ -447,7 +447,7 @@ menuentry 'UEFI Firmware Ayarlari' {
 fi
 EOF
 
-# .disk/info: kurulum programi pencere basligindaki adi buradan okur; bicim orijinalle ayni kalmali
+# .disk/info: the installer reads the window-title name from here; the format must stay the same as the original
 printf 'XenonOS 26.04 "Resolute Raccoon" - Release amd64 (20260423.1)\n' > diskinfo
 
 echo ">> ISO yaziliyor: $OUT"

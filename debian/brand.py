@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""XenonOS marka varliklari: her sey Xenon elementi (Xe, atom no 54) kimligiyle uretilir.
+"""XenonOS brand assets: everything is built around the identity of the element Xenon (Xe, atomic number 54).
 
-Xenon: atom numarasi 54, simge Xe, atom kutlesi 131.293, soy gaz (grup 18, periyot 5),
-elektron dizilimi 2-8-18-18-8. Xenon lambasinin isimasi mavi-mor: marka renkleri bundan gelir.
+Xenon: atomic number 54, symbol Xe, atomic mass 131.293, noble gas (group 18, period 5),
+electron configuration 2-8-18-18-8. A xenon lamp glows blue-purple: the brand colors come from that.
 """
 import os
 import sys
 
 A, Z, MASS = "Xe", 54, "131.293"
 SHELLS = [2, 8, 18, 18, 8]
-C1, C2, BG1, BG2, FG = "#6ee7ff", "#9b6bff", "#0b0720", "#1a0f45", "#f1ecff"   # mavi-mor isima
+C1, C2, BG1, BG2, FG = "#6ee7ff", "#9b6bff", "#0b0720", "#1a0f45", "#f1ecff"   # blue-purple glow
 
 DEFS = (f'<defs>'
         f'<linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{C1}"/><stop offset="1" stop-color="{C2}"/></linearGradient>'
@@ -57,14 +57,14 @@ def svg(w, h, body):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{DEFS}{body}</svg>'
 
 
-def logo():           # yatay logo: karo + XENONOS
+def logo():           # horizontal logo: tile + XENONOS
     return svg(640, 200,
                tile(10, 10, 180) +
                f'<text x="215" y="115" {FONT} font-size="78" font-weight="700" letter-spacing="8" fill="{FG}">XENON<tspan fill="url(#gl)">OS</tspan></text>'
                f'<text x="218" y="160" {FONT} font-size="22" letter-spacing="7" fill="{C1}" opacity=".85">ELEMENT 54  ·  Xe</text>')
 
 
-def icon():           # kare simge (karo)
+def icon():           # square icon (tile)
     return svg(256, 256, tile(8, 8, 240))
 
 
@@ -79,7 +79,7 @@ def wallpaper():
                f'<text x="178" y="650" {FONT} font-size="26" letter-spacing="6" fill="{FG}" opacity=".55">Xe · 54 · 131.293 · [Kr] 4d10 5s2 5p6</text>')
 
 
-def app_icon(glyph):  # 128x128 uygulama simgesi (karo stili)
+def app_icon(glyph):  # 128x128 app icon (tile style)
     return svg(128, 128,
                f'<rect width="128" height="128" rx="26" fill="url(#bg)" stroke="url(#gl)" stroke-width="3"/>'
                f'<text x="12" y="25" {FONT} font-size="17" font-weight="700" fill="{C1}">{Z}</text>'

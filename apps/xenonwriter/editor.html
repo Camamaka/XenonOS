@@ -86,7 +86,7 @@ body{margin:0;padding:28px 0 60px;display:flex;justify-content:center;font-famil
       } else document.execCommand('insertHTML', false, '&emsp;');
     }
   });
-  // yapistirilan metindeki satir ici stilleri sadelestir (arka plan / yazi tipi karisikligi olmasin)
+  // simplify inline styles in pasted text (avoid background / font clutter)
   page.addEventListener('paste', function(e){
     var cd = e.clipboardData; if (!cd) return;
     var html = cd.getData('text/html');
