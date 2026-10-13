@@ -8,3 +8,6 @@ dist/
 release/
 .env.local
 *.local
+
+debian/build.log
+debian/out/
