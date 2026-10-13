@@ -68,9 +68,8 @@ and detects the page language. Translation service: `translate.googleapis.com` (
 If access to the service changes, update the `gtx()` function in `content.js`.
 
 ## Credits
-- **Founders:** DTA and CMK
+- **Founders:** DTA and CMK ([@Camamaka](https://github.com/Camamaka))
 - **Design:** EHA
-- **Maintainer:** [Camamaka](https://github.com/Camamaka)
 
 ## Contributing and license
 Issues and pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). XenonOS is released under the [MIT License](LICENSE).
