@@ -75,7 +75,7 @@ cat > wall.svg <<'EOF'
     <polygon points="420,760 480,795 480,865 420,900 360,865 360,795"/>
   </g>
   <text x="960" y="700" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="96" font-weight="bold" letter-spacing="14" fill="#e6faff">XENONOS</text>
-  <text x="960" y="760" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="28" letter-spacing="6" fill="#00e5ff" opacity="0.8">Ubuntu 26.04 tabanli</text>
+  <text x="960" y="760" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="28" letter-spacing="6" fill="#00e5ff" opacity="0.8">Ubuntu 26.04 based</text>
 </svg>
 EOF
 rsvg-convert -w 1920 -h 1080 wall.svg -o wall.png
@@ -129,8 +129,8 @@ cat > $R/usr/share/applications/org.xenonos.Xenonium.desktop <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=Xenonium
-GenericName=Web Tarayicisi
-Comment=XenonOS web tarayicisi (XenonTranslate dahil)
+GenericName=Web Browser
+Comment=XenonOS web browser (includes XenonTranslate)
 Exec=xenonium %U
 Icon=xenonium
 Terminal=false
@@ -138,37 +138,37 @@ Categories=Network;WebBrowser;
 MimeType=text/html;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
 StartupWMClass=xenonium
 StartupNotify=true
-Keywords=web;internet;tarayici;browser;
+Keywords=web;internet;browser;
 Actions=new-window;private-window;
 
 [Desktop Action new-window]
-Name=Yeni pencere
+Name=New window
 Exec=xenonium
 
 [Desktop Action private-window]
-Name=Yeni gizli pencere
+Name=New private window
 Exec=xenonium --private
 EOF
 cat > $R/usr/share/applications/org.xenonos.XenonPad.desktop <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=XenonPad
-GenericName=Metin Duzenleyici
-Comment=XenonOS metin duzenleyicisi
+GenericName=Text Editor
+Comment=XenonOS text editor
 Exec=xenonpad %F
 Icon=xenonpad
 Terminal=false
 Categories=Utility;TextEditor;GTK;
 MimeType=text/plain;text/markdown;text/x-python;text/x-csrc;application/x-shellscript;application/json;application/xml;
 StartupNotify=true
-Keywords=metin;not;editor;text;
+Keywords=text;note;editor;
 EOF
 cat > $R/usr/share/applications/org.xenonos.XenonWriter.desktop <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=XenonWriter
-GenericName=Kelime Islemci
-Comment=XenonOS kelime islemcisi
+GenericName=Word Processor
+Comment=XenonOS word processor
 Exec=xenonwriter %F
 Icon=xenonwriter
 Terminal=false
@@ -176,7 +176,7 @@ Categories=Office;WordProcessor;GTK;
 MimeType=text/html;
 StartupWMClass=xenonwriter
 StartupNotify=true
-Keywords=yazi;belge;word;writer;kelime;
+Keywords=text;document;word;writer;
 EOF
 # default browser / text editor
 mkdir -p $R/etc/xdg $R/etc/alternatives
@@ -208,24 +208,24 @@ PY
 
 echo ">> Application names..."
 A=$R/usr/share/applications
-rename_desktop $A/org.gnome.Nautilus.desktop         "Xenon Dosyalar"      "XenonOS dosya yoneticisi"
-rename_desktop $A/org.gnome.Ptyxis.desktop           "Xenon Terminal"      "XenonOS terminali"
-rename_desktop $A/org.gnome.Settings.desktop         "Xenon Ayarlar"       "XenonOS sistem ayarlari"
-rename_desktop $A/org.gnome.Calculator.desktop       "Xenon Hesap"         "XenonOS hesap makinesi"
-rename_desktop $A/org.gnome.clocks.desktop           "Xenon Saat"          "XenonOS saat ve alarm"
-rename_desktop $A/org.gnome.Loupe.desktop            "Xenon Resim"         "XenonOS resim gorunturleyici"
-rename_desktop $A/org.gnome.Papers.desktop           "Xenon Belge"         "XenonOS belge gorunturleyici"
-rename_desktop $A/org.gnome.baobab.desktop           "Xenon Disk Analizi"  "XenonOS disk kullanim analizi"
-rename_desktop $A/org.gnome.DiskUtility.desktop      "Xenon Diskler"       "XenonOS disk yoneticisi"
-rename_desktop $A/org.gnome.Characters.desktop       "Xenon Karakterler"
-rename_desktop $A/org.gnome.Logs.desktop             "Xenon Gunluk"
-rename_desktop $A/org.gnome.Yelp.desktop             "Xenon Yardim"        "XenonOS yardim"
-rename_desktop $A/net.nokyan.Resources.desktop       "Xenon Monitor"       "XenonOS sistem monitoru"
-rename_desktop $A/org.gnome.font-viewer.desktop      "Xenon Yazi Tipleri"
-rename_desktop $A/org.gnome.Extensions.desktop       "Xenon Eklentiler"
-rename_desktop $A/nm-connection-editor.desktop       "Xenon Ag Duzenleyici"
-rename_desktop $A/update-manager.desktop             "Xenon Guncelleme"    "XenonOS yazilim guncelleyici"
-rename_desktop $A/gnome-language-selector.desktop    "Xenon Dil Destegi"
+rename_desktop $A/org.gnome.Nautilus.desktop         "Xenon Files"         "XenonOS file manager"
+rename_desktop $A/org.gnome.Ptyxis.desktop           "Xenon Terminal"      "XenonOS terminal"
+rename_desktop $A/org.gnome.Settings.desktop         "Xenon Settings"      "XenonOS system settings"
+rename_desktop $A/org.gnome.Calculator.desktop       "Xenon Calculator"    "XenonOS calculator"
+rename_desktop $A/org.gnome.clocks.desktop           "Xenon Clocks"        "XenonOS clocks and alarms"
+rename_desktop $A/org.gnome.Loupe.desktop            "Xenon Image Viewer"  "XenonOS image viewer"
+rename_desktop $A/org.gnome.Papers.desktop           "Xenon Documents"     "XenonOS document viewer"
+rename_desktop $A/org.gnome.baobab.desktop           "Xenon Disk Usage"    "XenonOS disk usage analyzer"
+rename_desktop $A/org.gnome.DiskUtility.desktop      "Xenon Disks"         "XenonOS disk manager"
+rename_desktop $A/org.gnome.Characters.desktop       "Xenon Characters"
+rename_desktop $A/org.gnome.Logs.desktop             "Xenon Logs"
+rename_desktop $A/org.gnome.Yelp.desktop             "Xenon Help"          "XenonOS help"
+rename_desktop $A/net.nokyan.Resources.desktop       "Xenon Monitor"       "XenonOS system monitor"
+rename_desktop $A/org.gnome.font-viewer.desktop      "Xenon Fonts"
+rename_desktop $A/org.gnome.Extensions.desktop       "Xenon Extensions"
+rename_desktop $A/nm-connection-editor.desktop       "Xenon Network Editor"
+rename_desktop $A/update-manager.desktop             "Xenon Updates"       "XenonOS software updater"
+rename_desktop $A/gnome-language-selector.desktop    "Xenon Language Support"
 
 echo ">> Theme (dconf)..."
 mkdir -p $R/etc/dconf/profile $R/etc/dconf/db/xenon.d
@@ -247,7 +247,7 @@ dconf compile $R/etc/dconf/db/xenon $R/etc/dconf/db/xenon.d
 
 echo ">> Firefox settings..."
 cat > home.html <<'EOF'
-<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Xenonium</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Xenonium</title>
 <style>
 body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
 background:radial-gradient(ellipse at 50% 40%,#0d2b3e,#05070d);font-family:sans-serif;color:#e6faff}
@@ -259,9 +259,9 @@ input{width:100%;box-sizing:border-box;padding:16px 22px;border-radius:30px;bord
 a{color:#00e5ff;text-decoration:none;border:1px solid #1d4b63;border-radius:20px;padding:8px 18px}
 a:hover{background:#12354a}
 </style></head><body>
-<h1>XENONIUM</h1><p>XenonOS web tarayicisi</p>
-<form action="https://duckduckgo.com/" method="get"><input name="q" placeholder="Ara veya adres yaz..." autofocus></form>
-<div class="l"><a href="https://tr.wikipedia.org">Vikipedi</a><a href="https://help.ubuntu.com">Ubuntu Yardim</a><a href="https://github.com">GitHub</a><a href="https://www.youtube.com">YouTube</a></div>
+<h1>XENONIUM</h1><p>XenonOS web browser</p>
+<form action="https://duckduckgo.com/" method="get"><input name="q" placeholder="Search or type an address..." autofocus></form>
+<div class="l"><a href="https://en.wikipedia.org">Wikipedia</a><a href="https://help.ubuntu.com">Ubuntu Help</a><a href="https://github.com">GitHub</a><a href="https://www.youtube.com">YouTube</a></div>
 </body></html>
 EOF
 python3 - <<'PY'
@@ -277,8 +277,8 @@ pol = {"policies": {
     "Homepage": {"URL": url, "Locked": False, "StartPage": "homepage"},
     "SearchEngines": {"Default": "DuckDuckGo"},
     "Bookmarks": [
-        {"Title": "Vikipedi", "URL": "https://tr.wikipedia.org", "Placement": "toolbar"},
-        {"Title": "Ubuntu Yardim", "URL": "https://help.ubuntu.com", "Placement": "toolbar"},
+        {"Title": "Wikipedia", "URL": "https://en.wikipedia.org", "Placement": "toolbar"},
+        {"Title": "Ubuntu Help", "URL": "https://help.ubuntu.com", "Placement": "toolbar"},
         {"Title": "GitHub", "URL": "https://github.com", "Placement": "toolbar"},
     ],
     "Preferences": {
@@ -302,16 +302,16 @@ rn() {
     awk -v n="$2" '/^\[Desktop Action/{act=1} !act && /^Name(\[[^]]*\])?=/ { if ($0 ~ /^Name=/) print "Name=" n; next } {print}' "$f" > "$f.tmp" \
         && cat "$f.tmp" > "$f" && rm -f "$f.tmp"
 }
-rn snap-store_snap-store.desktop "Xenon Magaza"
-rn firmware-updater_firmware-updater.desktop "Xenon Aygit Yazilimi"
-rn desktop-security-center_desktop-security-center.desktop "Xenon Guvenlik"
-rn ubuntu-desktop-bootstrap_ubuntu-desktop-bootstrap.desktop "XenonOS Kur"
+rn snap-store_snap-store.desktop "Xenon Store"
+rn firmware-updater_firmware-updater.desktop "Xenon Firmware"
+rn desktop-security-center_desktop-security-center.desktop "Xenon Security"
+rn ubuntu-desktop-bootstrap_ubuntu-desktop-bootstrap.desktop "Install XenonOS"
 exit 0
 EOF
 chmod 755 $R/usr/local/bin/xenon-brand
 cat > $R/etc/systemd/system/xenon-brand.service <<'EOF'
 [Unit]
-Description=XenonOS uygulama adlari
+Description=XenonOS application names
 After=snapd.seeded.service
 [Service]
 Type=oneshot
@@ -321,7 +321,7 @@ WantedBy=multi-user.target
 EOF
 cat > $R/etc/systemd/system/xenon-brand.path <<'EOF'
 [Unit]
-Description=XenonOS uygulama adlarini izle
+Description=Watch XenonOS application names
 [Path]
 PathChanged=/var/lib/snapd/desktop/applications
 [Install]
@@ -332,11 +332,11 @@ ln -sf /etc/systemd/system/xenon-brand.service $R/etc/systemd/system/multi-user.
 ln -sf /etc/systemd/system/xenon-brand.path    $R/etc/systemd/system/multi-user.target.wants/xenon-brand.path
 
 mkdir -p $R/etc/skel
-cat > $R/etc/skel/XenonOS-Hosgeldin.txt <<'EOF'
-XenonOS'a hos geldin!
+cat > $R/etc/skel/XenonOS-Welcome.txt <<'EOF'
+Welcome to XenonOS!
 
-Bu sistem Ubuntu 26.04 LTS uzerine kuruludur. Tum Ubuntu paketleri
-ve guncellemeleri aynen calisir:
+This system is built on Ubuntu 26.04 LTS. All Ubuntu packages
+and updates work as usual:
 
     sudo apt update && sudo apt upgrade
 EOF
@@ -354,24 +354,24 @@ echo ">> Unpacking standard layer..."
 [ -f standard.squashfs ] || xorriso -osirrox on -indev "$SRC_ISO" -extract /casper/minimal.standard.squashfs standard.squashfs
 rm -rf stdfs; unsquashfs -f -d stdfs standard.squashfs >/dev/null
 SA=stdfs/usr/share/applications
-rename_desktop $SA/libreoffice-writer.desktop      "Xenon Ofis Writer"     "LibreOffice tabanli kelime islemci"
-rename_desktop $SA/libreoffice-calc.desktop        "Xenon Ofis Calc"       "LibreOffice tabanli hesap tablosu"
-rename_desktop $SA/libreoffice-impress.desktop     "Xenon Ofis Impress"    "LibreOffice tabanli sunum"
-rename_desktop $SA/libreoffice-draw.desktop        "Xenon Ofis Draw"       "LibreOffice tabanli cizim"
-rename_desktop $SA/libreoffice-math.desktop        "Xenon Ofis Math"       "LibreOffice tabanli formul editoru"
-rename_desktop $SA/libreoffice-startcenter.desktop "Xenon Ofis"            "LibreOffice ofis paketi"
-rename_desktop $SA/org.gnome.Calendar.desktop      "Xenon Takvim"
-rename_desktop $SA/org.gnome.DejaDup.desktop       "Xenon Yedek"
-rename_desktop $SA/org.gnome.FileRoller.desktop    "Xenon Arsiv"
-rename_desktop $SA/org.gnome.Rhythmbox3.desktop    "Xenon Muzik"
-rename_desktop $SA/org.gnome.Shotwell.desktop      "Xenon Fotograf"
+rename_desktop $SA/libreoffice-writer.desktop      "Xenon Office Writer"   "LibreOffice-based word processor"
+rename_desktop $SA/libreoffice-calc.desktop        "Xenon Office Calc"     "LibreOffice-based spreadsheet"
+rename_desktop $SA/libreoffice-impress.desktop     "Xenon Office Impress"  "LibreOffice-based presentation"
+rename_desktop $SA/libreoffice-draw.desktop        "Xenon Office Draw"     "LibreOffice-based drawing"
+rename_desktop $SA/libreoffice-math.desktop        "Xenon Office Math"     "LibreOffice-based formula editor"
+rename_desktop $SA/libreoffice-startcenter.desktop "Xenon Office"          "LibreOffice office suite"
+rename_desktop $SA/org.gnome.Calendar.desktop      "Xenon Calendar"
+rename_desktop $SA/org.gnome.DejaDup.desktop       "Xenon Backup"
+rename_desktop $SA/org.gnome.FileRoller.desktop    "Xenon Archive"
+rename_desktop $SA/org.gnome.Rhythmbox3.desktop    "Xenon Music"
+rename_desktop $SA/org.gnome.Shotwell.desktop      "Xenon Photos"
 rename_desktop $SA/org.gnome.Showtime.desktop      "Xenon Video"
-rename_desktop $SA/org.gnome.Snapshot.desktop      "Xenon Kamera"
-rename_desktop $SA/org.remmina.Remmina.desktop     "Xenon Uzak Masaustu"
-rename_desktop $SA/simple-scan.desktop             "Xenon Tarayici"
-rename_desktop $SA/transmission-gtk.desktop        "Xenon Indirici"
-rename_desktop $SA/usb-creator-gtk.desktop         "Xenon USB Olusturucu"
-rename_desktop $SA/thunderbird.desktop             "Xenonmail"             "XenonOS e-posta"
+rename_desktop $SA/org.gnome.Snapshot.desktop      "Xenon Camera"
+rename_desktop $SA/org.remmina.Remmina.desktop     "Xenon Remote Desktop"
+rename_desktop $SA/simple-scan.desktop             "Xenon Scanner"
+rename_desktop $SA/transmission-gtk.desktop        "Xenon Downloader"
+rename_desktop $SA/usb-creator-gtk.desktop         "Xenon USB Creator"
+rename_desktop $SA/thunderbird.desktop             "Xenonmail"             "XenonOS email"
 echo ">> Packing standard layer..."
 rm -f minimal.standard.xenon.squashfs
 mksquashfs stdfs minimal.standard.xenon.squashfs -comp xz -b 131072 -noappend -no-progress
@@ -401,10 +401,10 @@ if [ -n "$ICON" ] && [ -f "$ICON" ]; then
     echo "   installer icon replaced: $ICON"
 fi
 python3 "$HERE/patch_installer.py" inst/bin/lib/libapp.so
-rename_desktop livefs/usr/share/applications/gparted.desktop "Xenon Bolumleyici" "XenonOS disk bolumleme"
+rename_desktop livefs/usr/share/applications/gparted.desktop "Xenon Partitioner" "XenonOS disk partitioning"
 # the "Install RELEASE" shortcut on the desktop
-rename_desktop livefs/var/lib/snapd/desktop/applications/ubuntu-desktop-bootstrap_ubuntu-desktop-bootstrap.desktop "XenonOS Kur"
-rename_desktop inst/meta/gui/ubuntu-desktop-bootstrap.desktop "XenonOS Kur"
+rename_desktop livefs/var/lib/snapd/desktop/applications/ubuntu-desktop-bootstrap_ubuntu-desktop-bootstrap.desktop "Install XenonOS"
+rename_desktop inst/meta/gui/ubuntu-desktop-bootstrap.desktop "Install XenonOS"
 SQ_COMP=$(unsquashfs -s "livefs/var/lib/snapd/seed/snaps/$SNAP_REL" | awk '/^Compression/{print $2}')
 SQ_BS=$(unsquashfs -s "livefs/var/lib/snapd/seed/snaps/$SNAP_REL" | awk '/^Block size/{print $3}')
 echo "   snap compression: $SQ_COMP, block: $SQ_BS"
@@ -426,22 +426,22 @@ loadfont unicode
 set menu_color_normal=cyan/black
 set menu_color_highlight=black/cyan
 
-menuentry "XenonOS 1.0  -  Dene veya Kur" {
+menuentry "XenonOS 1.0  -  Try or Install" {
     set gfxpayload=keep
     linux  /casper/vmlinuz  --- quiet splash
     initrd /casper/initrd
 }
-menuentry "XenonOS 1.0  -  Guvenli grafik (nomodeset)" {
+menuentry "XenonOS 1.0  -  Safe graphics (nomodeset)" {
     set gfxpayload=keep
     linux  /casper/vmlinuz nomodeset  --- quiet splash
     initrd /casper/initrd
 }
 grub_platform
 if [ "$grub_platform" = "efi" ]; then
-menuentry 'Sonraki diskten ac' {
+menuentry 'Boot from next disk' {
     exit 1
 }
-menuentry 'UEFI Firmware Ayarlari' {
+menuentry 'UEFI Firmware Settings' {
     fwsetup
 }
 fi

@@ -653,7 +653,7 @@ class WriterWindow(Gtk.ApplicationWindow):
 
         def fail(o, e):
             if DEBUG:
-                print("pdf hatasi:", e.message, flush=True)
+                print("pdf error:", e.message, flush=True)
             if done:
                 done(False)
             else:

@@ -1,8 +1,8 @@
-/* XenonTranslate 1.0  -  Xenonium eklentisi
- * - Secili metni cevirir (kucuk dugme -> kart)
- * - Tum sayfayi cevirir / orijinale dondurur (arac cubugu dugmesi veya Alt+T)
- * - Sayfa dilini otomatik algilar; dinamik icerigi de cevirir
- * Servis: translate.googleapis.com (gtx, anahtarsiz) - yedek: MyMemory (yalnizca secili metin)
+/* XenonTranslate 1.0  -  Xenonium extension
+ * - Translates the selected text (small button -> card)
+ * - Translates the whole page / restores the original (toolbar button or Alt+T)
+ * - Detects the page language automatically; also translates dynamic content
+ * Service: translate.googleapis.com (gtx, keyless) - fallback: MyMemory (selected text only)
  */
 (function () {
   "use strict";
@@ -27,7 +27,7 @@
     originals: new Map(), observer: null, pending: new Set(), obsTimer: null
   };
 
-  /* ---------------------------------------------------------------- servis */
+  /* ---------------------------------------------------------------- service */
   function gtx(text, target) {
     var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" + encodeURIComponent(target) +
       "&dt=t&q=" + encodeURIComponent(text);
@@ -58,7 +58,7 @@
     });
   }
 
-  /* ---------------------------------------------------------------- arayuz (shadow DOM) */
+  /* ---------------------------------------------------------------- UI (shadow DOM) */
   var host = document.createElement("xenon-translate-root");
   host.style.cssText = "all:initial;position:fixed;z-index:2147483647;top:0;left:0;width:0;height:0";
   var root = host.attachShadow({ mode: "closed" });
@@ -94,7 +94,7 @@
   }
   function setTarget(code) { state.target = code; xenon.storage.set("target", code); }
 
-  /* ---- secili metin dugmesi + karti ---- */
+  /* ---- selected-text button + card ---- */
   var fab = null, card = null, lastSel = "";
   function removeFab() { if (fab) { fab.remove(); fab = null; } }
   function removeCard() { if (card) { card.remove(); card = null; } }
@@ -160,7 +160,7 @@
   }
   function langName(code) { for (var i = 0; i < LANGS.length; i++) if (LANGS[i][0].toLowerCase() === String(code).toLowerCase() || LANGS[i][0].split("-")[0] === code) return LANGS[i][1]; return code; }
 
-  /* ---- sayfa cevirisi ---- */
+  /* ---- page translation ---- */
   function collectNodes(rootNode) {
     var out = [];
     var w = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
@@ -182,7 +182,7 @@
     var p = n.parentElement; if (!p) return false;
     var r = p.getBoundingClientRect(); return r.bottom > -200 && r.top < window.innerHeight + 600;
   }
-  /* --- birimler: ayni blok icindeki (kalin / baglanti vb. ile bolunmus) metin dugumleri tek cumle gibi cevrilir --- */
+  /* --- units: text nodes in the same block (split by bold / links etc.) are translated like a single sentence --- */
   function blockOf(node) {
     for (var p = node.parentElement; p && p !== document.body; p = p.parentElement) {
       var d = getComputedStyle(p).display;
@@ -190,7 +190,7 @@
     }
     return document.body;
   }
-  /* baglanti iceren cumle: baglantilar tek tek <k>..</k> ile isaretlenir, aradaki duz metin butun halde cevrilir */
+  /* sentence containing links: links are marked one by one with <k>..</k>, the plain text in between is translated as a whole */
   function isLink(n) { return !!(n.parentElement && n.parentElement.closest("a,button,input,select,label,summary")); }
   function buildTags(u) {
     var items = [], k = 0, str = "";
@@ -400,7 +400,7 @@
     root.appendChild(panel); refresh();
   }
 
-  /* ---------------------------------------------------------------- baslat */
+  /* ---------------------------------------------------------------- start */
   xenon.onCommand(function (name) {
     if (name === "toggle-panel") togglePanel();
     else if (name === "translate-page") { openPanel(); }

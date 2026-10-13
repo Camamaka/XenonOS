@@ -20,7 +20,7 @@ FONT = "font-family=\"DejaVu Sans, Noto Sans, sans-serif\""
 
 
 def tile(x, y, s, name=True):
-    """Periyodik tablo karosu (Xe / 54). (x,y) sol ust, s kenar."""
+    """Periodic table tile (Xe / 54). (x,y) top left, s side length."""
     r = s * 0.1
     sw = max(2, s * 0.025)
     t = [f'<g transform="translate({x},{y})">',

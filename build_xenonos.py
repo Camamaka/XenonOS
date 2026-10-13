@@ -70,26 +70,26 @@ AL, CL, DL, BL, AH, CH, DH, BH = range(8)
 
 # ------------------------------------------------------------------ texts
 FIKRALAR = [
-    "Temel doktora gider: 'Doktor bey, unutkanlik basladi.'\r\nDoktor: 'Ne zamandan beri?'  Temel: 'Ne zamandan beri ne?'",
-    "Ogretmen: 'Cocuklar, bir cumlede hem cunku hem ama kullanin.'\r\nAli: 'Cunku ders cok guzeldi ama zil caldi.'",
-    "Nasreddin Hoca'ya sormuslar: 'Ay mi faydali gunes mi?'\r\nHoca: 'Ay tabii! Karanlikta isik veriyor, gunes zaten gunduz var.'",
-    "Adam bakkala girer: 'Bir ekmek verir misiniz?' Bakkal: 'Dilimli mi?'\r\nAdam: 'Hayir, butun olsun, ben kendim yutarim.'",
-    "Bilgisayar neden soguk almaz?\r\nCunku hep Windows'u aciktir... ama o da bazen donar.",
-    "Kedi kopege demis: 'Sen neden hep havliyorsun?'\r\nKopek: 'Cunku sen hep miyavliyorsun, birimiz konusmali.'",
+    "Temel goes to the doctor: 'Doctor, I've started forgetting things.'\r\nDoctor: 'Since when?'  Temel: 'Since when what?'",
+    "Teacher: 'Children, use both because and but in one sentence.'\r\nAli: 'Because the lesson was great, but the bell rang.'",
+    "They asked Nasreddin Hoca: 'Which is more useful, the moon or the sun?'\r\nHoca: 'The moon, of course! It gives light in the dark; the sun is out in the daytime anyway.'",
+    "A man walks into a grocery: 'Could I have a loaf of bread?' Grocer: 'Sliced?'\r\nMan: 'No, whole, I'll swallow it myself.'",
+    "Why doesn't a computer catch a cold?\r\nBecause its Windows is always open... but it freezes sometimes.",
+    "The cat asked the dog: 'Why do you always bark?'\r\nDog: 'Because you always meow, one of us has to talk.'",
 ]
 SOZLER = [
-    "Kucuk adimlar da seni hedefe goturur. Onemli olan durmamak.",
-    "Bugun dunden bir adim daha iyi olmak yeterli.",
-    "Hata yapmak ogrenmenin bir parcasidir, vazgecmek degil.",
-    "En karanlik an, safaktan hemen oncedir.",
-    "Baslamak icin mukemmel olmayi bekleme, basla ki mukemmellesesin.",
-    "Yapabilecegine inan, yolun yarisini gecmis olursun.",
+    "Small steps also take you to the goal. What matters is not stopping.",
+    "Being one step better than yesterday is enough.",
+    "Making mistakes is part of learning, giving up is not.",
+    "The darkest hour is just before dawn.",
+    "Don't wait to be perfect to start; start so that you become perfect.",
+    "Believe you can and you're halfway there.",
 ]
 YEMEKLER = [
-    "Menemen (sogansiz mi soganli mi tartismasi bonus)",
-    "Lahmacun ve ayran", "Manti, bol yogurtlu", "Tavuklu pilav ve cacik",
-    "Makarna, ustune bol peynir", "Kuru fasulye ve pilav",
-    "Tost ve bir bardak cay", "Mercimek corbasi ve limon", "Pizza gecesi!",
+    "Menemen (the onions-or-no-onions debate is a bonus)",
+    "Lahmacun and ayran", "Manti with lots of yogurt", "Chicken rice and cacik",
+    "Pasta with lots of cheese on top", "White beans and rice",
+    "Toast and a glass of tea", "Lentil soup with lemon", "Pizza night!",
 ]
 
 NL = "\r\n"
@@ -98,16 +98,16 @@ BANNER = (
     "   \\ \\/ /___  ____  ____  ____ ___  / _ \\/ __/ " + NL +
     "    \\  / -_)/ _ \\/ _ \\/ _ \\/ _ \\_ \\ \\_, /\\ \\   " + NL +
     "    /_/\\__/ _//_/\\___/_//_/\\___/___/  /_/___/   " + NL + NL +
-    "              XenonOS v0.1  -  senin ilk isletim sistemin" + NL + NL +
-    "   [1] Gunun fikrasi" + NL +
-    "   [2] Motivasyon sozu" + NL +
-    "   [3] Bugun ne yesem?" + NL +
-    "   [4] Zar at" + NL +
-    "   [5] Surpriz!" + NL +
-    "   [0] Yeniden baslat" + NL + NL +
-    "   Bir tusa bas > "
+    "              XenonOS v0.1  -  your first operating system" + NL + NL +
+    "   [1] Joke of the day" + NL +
+    "   [2] Motivational quote" + NL +
+    "   [3] What should I eat today?" + NL +
+    "   [4] Roll a die" + NL +
+    "   [5] Surprise!" + NL +
+    "   [0] Reboot" + NL + NL +
+    "   Press a key > "
 )
-DEVAM = NL + NL + "   (devam icin bir tusa bas)"
+DEVAM = NL + NL + "   (press a key to continue)"
 
 
 def kernel():
@@ -248,11 +248,11 @@ def kernel():
     s('banner', BANNER)
     s('devam', DEVAM)
     s('nl2', NL + NL)
-    s('t_fikra', NL + "   === GUNUN FIKRASI ===" + NL + NL + "   ")
-    s('t_soz', NL + "   === MOTIVASYON ===" + NL + NL + "   ")
-    s('t_yemek', NL + "   === BUGUN NE YESEM? ===" + NL + NL + "   Oneri: ")
-    s('t_zar', NL + "   === ZAR ===" + NL + NL + "   Zar: ")
-    s('t_surpriz', NL + "   === SURPRIZ! ===" + NL + NL)
+    s('t_fikra', NL + "   === JOKE OF THE DAY ===" + NL + NL + "   ")
+    s('t_soz', NL + "   === MOTIVATION ===" + NL + NL + "   ")
+    s('t_yemek', NL + "   === WHAT SHOULD I EAT TODAY? ===" + NL + NL + "   Suggestion: ")
+    s('t_zar', NL + "   === DIE ===" + NL + NL + "   Die: ")
+    s('t_surpriz', NL + "   === SURPRISE! ===" + NL + NL)
 
     def table(lbl, items, prefix):
         for i, t in enumerate(items):
