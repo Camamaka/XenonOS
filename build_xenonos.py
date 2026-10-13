@@ -296,4 +296,4 @@ if __name__ == '__main__':
     img = bootsector(nsec) + k.ljust(nsec * 512, b'\0')
     img = img.ljust(1474560, b'\0')                # 1.44MB floppy
     open('XenonOS.img', 'wb').write(img)
-    print(f'XenonOS.img hazir: cekirdek {len(k)} bayt, {nsec} sektor')
+    print(f'XenonOS.img ready: kernel {len(k)} bytes, {nsec} sectors')

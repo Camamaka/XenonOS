@@ -18,15 +18,15 @@ SRC="/mnt/d/XenonOS/$ISO"   # ISO downloaded to the NVMe (Windows D:)
 if [ -f "$SRC" ]; then
     ISO="$SRC"
 elif [ ! -f "$ISO" ]; then
-    echo ">> Ubuntu Server ISO indiriliyor (~2.7 GB)..."
+    echo ">> Downloading Ubuntu Server ISO (~2.7 GB)..."
     curl -L -o "$ISO" "$URL/$ISO"
 fi
 
-echo ">> Sha256 kontrol ediliyor..."
+echo ">> Checking SHA256..."
 EXPECTED=$(curl -sL "$URL/SHA256SUMS" | grep "$(basename "$ISO")" | cut -d' ' -f1)
 echo "$EXPECTED  $ISO" | sha256sum -c -
 
-echo ">> XenonOS ISO'su olusturuluyor..."
+echo ">> Building the XenonOS ISO..."
 rm -f XenonOS.iso
 xorriso -indev "$ISO" -outdev XenonOS.iso \
     -map "$HERE/grub.cfg"  /boot/grub/grub.cfg \
@@ -36,4 +36,4 @@ xorriso -indev "$ISO" -outdev XenonOS.iso \
     -commit
 
 cp XenonOS.iso "$HERE/XenonOS.iso"
-echo ">> Hazir: $HERE/XenonOS.iso"
+echo ">> Ready: $HERE/XenonOS.iso"

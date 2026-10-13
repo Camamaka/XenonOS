@@ -27,7 +27,7 @@ public class WinClick {
 }
 "@
 $h = [WinClick]::Find($Title)
-if ($h -eq [IntPtr]::Zero) { "pencere yok: $Title"; exit 1 }
+if ($h -eq [IntPtr]::Zero) { "no window: $Title"; exit 1 }
 [void][WinClick]::SetForegroundWindow($h)
 Start-Sleep -Milliseconds 600
 $r = New-Object WinClick+RECT

@@ -9,9 +9,9 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 WORK=/root/xenonos-lb          # work on ext4 (permissions/device files break on a Windows drive)
 OUT="$HERE/out"
 
-if [ "$(id -u)" != 0 ]; then echo "root olarak calistir (sudo)"; exit 1; fi
+if [ "$(id -u)" != 0 ]; then echo "run as root (sudo)"; exit 1; fi
 
-echo ">> Gerekli araclar kuruluyor (apt)..."
+echo ">> Installing required tools (apt)..."
 apt-get update
 apt-get install -y debootstrap debian-archive-keyring squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools \
     syslinux syslinux-utils isolinux dosfstools python3 dpkg-dev librsvg2-bin
@@ -20,10 +20,10 @@ if ! dpkg -l live-build 2>/dev/null | awk '/^ii/ {print $3}' | grep -qE '^1:20';
     bash "$HERE/get-live-build.sh"
 fi
 
-echo ">> XenonOS .deb paketleri uretiliyor..."
+echo ">> Building XenonOS .deb packages..."
 bash "$HERE/build-debs.sh"
 
-echo ">> Calisma klasoru hazirlaniyor: $WORK"
+echo ">> Preparing work directory: $WORK"
 # unmount bind mounts left over from a previous attempt (so rm -rf does not touch them)
 for m in $(awk -v p="$WORK/" 'index($2, p) == 1 { print $2 }' /proc/mounts | sort -r); do umount -l "$m" || true; done
 rm -rf "$WORK"
@@ -39,7 +39,7 @@ cd "$WORK"
 echo ">> lb config"
 lb clean --purge 2>/dev/null || true
 lb config
-echo ">> lb build (uzun surer: 20-60 dk)"
+echo ">> lb build (takes a long time: 20-60 min)"
 lb build 2>&1 | tee "$HERE/build.log"
 
 mkdir -p "$OUT"
@@ -59,9 +59,9 @@ for f in $(cd "$PP" && find . -type f | sed 's|^\./||'); do
 done
 if [ ${#MAPS[@]} -gt 0 ]; then
     xorriso -indev "$ISO" -outdev "$ISO.new" "${MAPS[@]}" -boot_image any replay -commit >/dev/null 2>&1 \
-        && mv "$ISO.new" "$ISO" && echo "   ${#MAPS[@]} dosya guncellendi" || echo "   UYARI: menu etiketleri guncellenemedi"
+        && mv "$ISO.new" "$ISO" && echo "   ${#MAPS[@]} files updated" || echo "   WARNING: could not update menu labels"
 fi
 rm -rf "$PP"
 cp -v "$ISO" "$OUT/"
 sha256sum "$OUT/$(basename "$ISO")" | tee "$OUT/SHA256SUMS"
-echo ">> Hazir: $OUT/$(basename "$ISO")"
+echo ">> Ready: $OUT/$(basename "$ISO")"

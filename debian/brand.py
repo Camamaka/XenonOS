@@ -107,7 +107,7 @@ def main(out):
     for name, content in files.items():
         with open(os.path.join(out, name), "w", encoding="utf-8") as f:
             f.write(content)
-    print("marka dosyalari:", ", ".join(sorted(files)))
+    print("brand files:", ", ".join(sorted(files)))
 
 
 if __name__ == "__main__":

@@ -47,4 +47,4 @@ data = bytearray(standalone.sub(NEW, bytes(data)))
 alone = len(standalone.findall(bytes(open(path, 'rb').read())))
 
 open(path, 'wb').write(data)
-print(f'degistirilen: {count}, atlanan: {skipped}, tek basina Ubuntu (dosyada): {alone}')
+print(f'replaced: {count}, skipped: {skipped}, standalone Ubuntu (in file): {alone}')

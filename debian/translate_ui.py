@@ -69,7 +69,7 @@ def report(files):
             t = gtx(s)
         except Exception as e:  # noqa: BLE001
             t = s
-            print("HATA", s, e, file=sys.stderr)
+            print("ERROR", s, e, file=sys.stderr)
         # preserve leading/trailing whitespace and line endings
         lead = re.match(r"^\s*", s).group(0)
         trail = re.search(r"\s*$", s).group(0)
@@ -80,7 +80,7 @@ def report(files):
         result[s] = t
         time.sleep(0.08)
     json.dump(result, open(MAP, "w", encoding="utf-8"), ensure_ascii=False, indent=1, sort_keys=True)
-    print(f"{len(result)} metin -> {MAP}")
+    print(f"{len(result)} strings -> {MAP}")
 
 
 def apply(files):
@@ -116,7 +116,7 @@ def apply(files):
         text = "\n".join(b.decode("utf-8") for b in blines)
         ast.parse(text)          # syntax check: if broken, DO NOT WRITE the file
         open(path, "w", encoding="utf-8").write(text)
-        print(f"{path}: {done} metin degistirildi")
+        print(f"{path}: {done} strings replaced")
 
 
 if __name__ == "__main__":

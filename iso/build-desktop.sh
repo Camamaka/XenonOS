@@ -13,7 +13,7 @@ case "$SRC_ISO" in
     /mnt/e/*) mkdir -p /mnt/e; mountpoint -q /mnt/e || mount -t drvfs E: /mnt/e 2>/dev/null || true ;;
 esac
 if [ ! -f "$SRC_ISO" ]; then
-    echo "HATA: kaynak ISO bulunamadi: $SRC_ISO  (USB takili mi? WSL'de: mount -t drvfs E: /mnt/e)" >&2
+    echo "ERROR: source ISO not found: $SRC_ISO  (is the USB plugged in? In WSL: mount -t drvfs E: /mnt/e)" >&2
     exit 1
 fi
 
@@ -26,7 +26,7 @@ for m in $(awk -v p="$W/rootfs/" 'index($2, p) == 1 { print $2 }' /proc/mounts |
     umount -l "$m" 2>/dev/null || true
 done
 if awk -v p="$W/rootfs/" 'index($2, p) == 1 { f = 1 } END { exit !f }' /proc/mounts; then
-    echo "HATA: $W/rootfs altinda hala bagli klasor var, derleme durduruluyor" >&2
+    echo "ERROR: there are still mounted folders under $W/rootfs, stopping the build" >&2
     exit 1
 fi
 
@@ -48,15 +48,15 @@ rm -rf assets && python3 "$HERE/gen_assets.py" assets
 
 # ================================================================ BASE LAYER
 if [ "${SKIP_BASE:-0}" = 1 ] && [ -f minimal.xenon.squashfs ]; then
-echo ">> Taban katman atlandi (SKIP_BASE=1, mevcut dosya kullaniliyor)"
+echo ">> Base layer skipped (SKIP_BASE=1, using the existing file)"
 else
 [ -f minimal.squashfs ] || xorriso -osirrox on -indev "$SRC_ISO" -extract /casper/minimal.squashfs minimal.squashfs
-echo ">> Taban katman aciliyor..."
+echo ">> Unpacking base layer..."
 rm -rf rootfs
 unsquashfs -f -d rootfs minimal.squashfs >/dev/null
 R=rootfs
 
-echo ">> Duvar kagidi..."
+echo ">> Wallpaper..."
 cat > wall.svg <<'EOF'
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
   <defs>
@@ -83,7 +83,7 @@ B=$R/usr/share/backgrounds; mkdir -p "$B"
 for f in warty-final-ubuntu.png ubuntu-wallpaper-d.png; do rm -f "$B/$f"; cp wall.png "$B/$f"; done
 cp wall.png "$B/xenonos.png"
 
-echo ">> Surum adi / GRUB / logo..."
+echo ">> Version name / GRUB / logo..."
 sed -i 's|^PRETTY_NAME=.*|PRETTY_NAME="XenonOS 1.0 (Ubuntu 26.04 LTS)"|' $R/usr/lib/os-release
 sed -i 's|^NAME=.*|NAME="XenonOS"|' $R/usr/lib/os-release   # ID/ID_LIKE stay the same (apt, snap, pro)
 echo 'XENONOS_VERSION="1.0"' >> $R/usr/lib/os-release
@@ -111,7 +111,7 @@ for f in $(find $R/usr/share/plymouth -type f \( -iname '*watermark*' -o -iname 
     rsvg-convert -w "$1" -h "$2" --keep-aspect-ratio assets/logo-dark.svg -o "$f" || true
 done
 
-echo ">> XenonPad / XenonWriter / Xenonium kuruluyor..."
+echo ">> Installing XenonPad / XenonWriter / Xenonium..."
 APPS_SRC="$(cd "$HERE/.." && pwd)/apps"
 L=$R/usr/lib/xenonos
 mkdir -p $L $R/usr/bin $R/usr/share/applications $R/usr/share/icons/hicolor/scalable/apps
@@ -206,7 +206,7 @@ for fn in ("mimeapps.list", "ubuntu-mimeapps.list", "gnome-mimeapps.list"):
         cp.write(f, space_around_delimiters=False)
 PY
 
-echo ">> Uygulama adlari..."
+echo ">> Application names..."
 A=$R/usr/share/applications
 rename_desktop $A/org.gnome.Nautilus.desktop         "Xenon Dosyalar"      "XenonOS dosya yoneticisi"
 rename_desktop $A/org.gnome.Ptyxis.desktop           "Xenon Terminal"      "XenonOS terminali"
@@ -227,7 +227,7 @@ rename_desktop $A/nm-connection-editor.desktop       "Xenon Ag Duzenleyici"
 rename_desktop $A/update-manager.desktop             "Xenon Guncelleme"    "XenonOS yazilim guncelleyici"
 rename_desktop $A/gnome-language-selector.desktop    "Xenon Dil Destegi"
 
-echo ">> Tema (dconf)..."
+echo ">> Theme (dconf)..."
 mkdir -p $R/etc/dconf/profile $R/etc/dconf/db/xenon.d
 if [ -f $R/etc/dconf/profile/user ]; then
     grep -q 'system-db:xenon' $R/etc/dconf/profile/user || sed -i '0,/^user-db:user/s//user-db:user\nsystem-db:xenon/' $R/etc/dconf/profile/user
@@ -245,7 +245,7 @@ favorite-apps=['org.xenonos.Xenonium.desktop', 'org.gnome.Nautilus.desktop', 'or
 EOF
 dconf compile $R/etc/dconf/db/xenon $R/etc/dconf/db/xenon.d
 
-echo ">> Firefox ayarlari..."
+echo ">> Firefox settings..."
 cat > home.html <<'EOF'
 <!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Xenonium</title>
 <style>
@@ -290,7 +290,7 @@ os.makedirs('rootfs/etc/firefox/policies', exist_ok=True)
 json.dump(pol, open('rootfs/etc/firefox/policies/policies.json', 'w'), ensure_ascii=False, indent=2)
 PY
 
-echo ">> Snap uygulama adlarini Xenon yapan servis..."
+echo ">> Service that renames Snap apps to Xenon..."
 mkdir -p $R/usr/local/bin
 cat > $R/usr/local/bin/xenon-brand <<'EOF'
 #!/bin/sh
@@ -341,16 +341,16 @@ ve guncellemeleri aynen calisir:
     sudo apt update && sudo apt upgrade
 EOF
 
-echo ">> Taban katman paketleniyor (xz)..."
+echo ">> Packing base layer (xz)..."
 rm -f minimal.xenon.squashfs
 mksquashfs $R minimal.xenon.squashfs -comp xz -b 131072 -noappend -no-progress
 fi
 
 # ================================================================ STANDARD LAYER (LibreOffice, Calendar, Video ...)
 if [ "${SKIP_STD:-0}" = 1 ] && [ -f minimal.standard.xenon.squashfs ]; then
-echo ">> Standart katman atlandi (SKIP_STD=1)"
+echo ">> Standard layer skipped (SKIP_STD=1)"
 else
-echo ">> Standart katman aciliyor..."
+echo ">> Unpacking standard layer..."
 [ -f standard.squashfs ] || xorriso -osirrox on -indev "$SRC_ISO" -extract /casper/minimal.standard.squashfs standard.squashfs
 rm -rf stdfs; unsquashfs -f -d stdfs standard.squashfs >/dev/null
 SA=stdfs/usr/share/applications
@@ -372,17 +372,17 @@ rename_desktop $SA/simple-scan.desktop             "Xenon Tarayici"
 rename_desktop $SA/transmission-gtk.desktop        "Xenon Indirici"
 rename_desktop $SA/usb-creator-gtk.desktop         "Xenon USB Olusturucu"
 rename_desktop $SA/thunderbird.desktop             "Xenonmail"             "XenonOS e-posta"
-echo ">> Standart katman paketleniyor..."
+echo ">> Packing standard layer..."
 rm -f minimal.standard.xenon.squashfs
 mksquashfs stdfs minimal.standard.xenon.squashfs -comp xz -b 131072 -noappend -no-progress
 fi
 
 # ================================================================ LIVE LAYER (installer)
-echo ">> Canli katman aciliyor..."
+echo ">> Unpacking live layer..."
 [ -f live.squashfs ] || xorriso -osirrox on -indev "$SRC_ISO" -extract /casper/minimal.standard.live.squashfs live.squashfs
 rm -rf livefs; unsquashfs -f -d livefs live.squashfs >/dev/null
 SNAP_REL=$(ls livefs/var/lib/snapd/seed/snaps/ | grep '^ubuntu-desktop-bootstrap_.*\.snap$' | head -1)
-echo "   kurulum snap'i: $SNAP_REL"
+echo "   installer snap: $SNAP_REL"
 rm -rf inst; unsquashfs -d inst "livefs/var/lib/snapd/seed/snaps/$SNAP_REL" >/dev/null
 FA=inst/bin/data/flutter_assets
 for f in assets/welcome/logo-light.svg assets/welcome/logo-dark.svg \
@@ -398,7 +398,7 @@ if [ -n "$ICON" ] && [ -f "$ICON" ]; then
         *.png) d=$(python3 -c "import struct,sys; d=open(sys.argv[1],'rb').read(32); print(*struct.unpack('>II', d[16:24]))" "$ICON"); set -- $d
                rsvg-convert -w "$1" -h "$2" assets/icon.svg -o "$ICON" ;;
     esac
-    echo "   kurulum simgesi degistirildi: $ICON"
+    echo "   installer icon replaced: $ICON"
 fi
 python3 "$HERE/patch_installer.py" inst/bin/lib/libapp.so
 rename_desktop livefs/usr/share/applications/gparted.desktop "Xenon Bolumleyici" "XenonOS disk bolumleme"
@@ -407,13 +407,13 @@ rename_desktop livefs/var/lib/snapd/desktop/applications/ubuntu-desktop-bootstra
 rename_desktop inst/meta/gui/ubuntu-desktop-bootstrap.desktop "XenonOS Kur"
 SQ_COMP=$(unsquashfs -s "livefs/var/lib/snapd/seed/snaps/$SNAP_REL" | awk '/^Compression/{print $2}')
 SQ_BS=$(unsquashfs -s "livefs/var/lib/snapd/seed/snaps/$SNAP_REL" | awk '/^Block size/{print $3}')
-echo "   snap sikistirma: $SQ_COMP, blok: $SQ_BS"
+echo "   snap compression: $SQ_COMP, block: $SQ_BS"
 rm -f new.snap
 mksquashfs inst new.snap -comp "$SQ_COMP" -b "$SQ_BS" -noappend -no-progress -all-root
 for d in livefs/var/lib/snapd/seed/snaps livefs/var/lib/snapd/snaps; do
     if [ -f "$d/$SNAP_REL" ]; then rm -f "$d/$SNAP_REL"; cp new.snap "$d/$SNAP_REL"; chmod 600 "$d/$SNAP_REL"; fi
 done
-echo ">> Canli katman paketleniyor..."
+echo ">> Packing live layer..."
 rm -f minimal.standard.live.xenon.squashfs
 mksquashfs livefs minimal.standard.live.xenon.squashfs -comp xz -b 131072 -noappend -no-progress
 
@@ -450,7 +450,7 @@ EOF
 # .disk/info: the installer reads the window-title name from here; the format must stay the same as the original
 printf 'XenonOS 26.04 "Resolute Raccoon" - Release amd64 (20260423.1)\n' > diskinfo
 
-echo ">> ISO yaziliyor: $OUT"
+echo ">> Writing ISO: $OUT"
 rm -f "$OUT"
 xorriso -indev "$SRC_ISO" -outdev "$OUT" \
     -map minimal.xenon.squashfs /casper/minimal.squashfs \
@@ -461,4 +461,4 @@ xorriso -indev "$SRC_ISO" -outdev "$OUT" \
     -volid "XENONOS" \
     -boot_image any replay \
     -commit
-echo ">> Hazir: $OUT"
+echo ">> Ready: $OUT"

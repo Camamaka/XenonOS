@@ -95,4 +95,4 @@ xenonwriter = svg128(
     '<g stroke="#0d2b3e" stroke-width="4.5" stroke-linecap="round" opacity=".6"><path d="M38 96h46M38 107h30"/></g>')
 for name, svg in (('xenonium', xenonium), ('xenonpad', xenonpad), ('xenonwriter', xenonwriter)):
     open(os.path.join(out, name + '.svg'), 'w').write(svg)
-print('logolar uretildi:', out)
+print('logos generated:', out)

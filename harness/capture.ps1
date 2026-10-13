@@ -26,7 +26,7 @@ public class WinCap {
 }
 "@
 $ws = [WinCap]::Find($Title)
-if ($ws.Count -eq 0) { "pencere bulunamadi: $Title"; exit 1 }
+if ($ws.Count -eq 0) { "window not found: $Title"; exit 1 }
 $h = $ws[0]
 [void][WinCap]::SetForegroundWindow($h)
 Start-Sleep -Milliseconds 700

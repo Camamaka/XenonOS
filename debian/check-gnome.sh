@@ -1,7 +1,7 @@
 #!/bin/bash
 # Validates candidate GNOME package names against the apt directory of the chroot left over from the previous build (no download)
 CH=/root/xenonos-lb/chroot
-[ -d "$CH/var/lib/apt/lists" ] || { echo "chroot yok"; exit 1; }
+[ -d "$CH/var/lib/apt/lists" ] || { echo "no chroot"; exit 1; }
 for p in gnome-shell gdm3 gnome-session nautilus gnome-control-center gnome-console gnome-terminal gnome-calculator \
          gnome-system-monitor gnome-disk-utility loupe papers evince gnome-tweaks gnome-shell-extension-manager \
          gnome-keyring xdg-desktop-portal-gnome gvfs-backends network-manager network-manager-gnome \
@@ -12,7 +12,7 @@ for p in gnome-shell gdm3 gnome-session nautilus gnome-control-center gnome-cons
          gnome-initial-setup gnome-online-accounts gnome-user-docs yelp malcontent gnome-software gnome-shell-extension-prefs \
          gnome-remote-desktop ibus ibus-gtk4 ibus-gtk3 chrome-gnome-shell gjs libsoup-3.0-0 gir1.2-soup-3.0 \
          desktop-base task-gnome-desktop gnome-core; do
-  if chroot "$CH" apt-cache show "$p" >/dev/null 2>&1; then echo "var : $p"; else echo "YOK : $p"; fi
+  if chroot "$CH" apt-cache show "$p" >/dev/null 2>&1; then echo "found   : $p"; else echo "MISSING : $p"; fi
 done
-echo "== GNOME Shell surumu"
+echo "== GNOME Shell version"
 chroot "$CH" apt-cache policy gnome-shell | head -3
